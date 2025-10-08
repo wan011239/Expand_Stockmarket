@@ -23,7 +23,7 @@
  * @param variables
  * @text 1. 变量设置
  * @type struct<VariablesStruct>
- * @default {"timeSettings":"{\"yearVar\":\"23\",\"monthVar\":\"24\",\"dayVar\":\"25\",\"weekVar\":\"27\",\"periodVar\":\"28\",\"hourVar\":\"26\"}","stockAccountVar":"62","stockHoldingsVar":"63","stockPricesVar":"64","stockAvgBuyPricesVar":"65","tradeLogVar":"66","priceHistoryVar":"67","inputAmountVar":"68","inputCodeVar":"69","contractMarginVar":"71","contractPositionsVar":"72","contractInputAmountVar":"73","contractInputCodeVar":"74","contractInputLeverageVar":"75","contractInputStopLossVar":"76","contractInputTakeProfitVar":"77","contractOrdersVar":"56","contractHistoryVar":"78","contractLongFundingRateVar":"79","contractShortFundingRateVar":"80"}
+ * @default {"timeSettings":"{\"yearVar\":\"23\",\"monthVar\":\"24\",\"dayVar\":\"25\",\"weekVar\":\"27\",\"periodVar\":\"28\",\"hourVar\":\"26\"}","stockAccountVar":"62","stockHoldingsVar":"63","stockPricesVar":"64","stockAvgBuyPricesVar":"65","tradeLogVar":"66","priceHistoryVar":"67","inputAmountVar":"69","inputCodeVar":"68","contractMarginVar":"71","contractPositionsVar":"72","contractInputLeverageVar":"75","contractInputStopLossVar":"76","contractInputTakeProfitVar":"77","contractOrdersVar":"56","contractHistoryVar":"78","contractLongFundingRateVar":"79","contractShortFundingRateVar":"80"}
 
  * @param volatility
  * @text 2. 涨跌设置
@@ -38,7 +38,7 @@
  * @param business
  * @text 4. 营业设置
  * @type struct<BusinessStruct>
- * @default {"enableBusinessHours":"true","businessPeriods":"[\"1\",\"2\"]","businessWeeks":"[\"1\",\"2\",\"3\",\"4\",\"5\"]"}
+ * @default {"enableBusinessHours":"true","businessPeriods":"[\"2\",\"3\"]","businessWeeks":"[\"1\",\"2\",\"3\",\"4\",\"5\"]"}
 
  * @param stock1
  * @text 5. 代码001
@@ -67,7 +67,7 @@
  * @param tradeSettings
  * @text 9. 交易设置
  * @type struct<TradeSettingsStruct>
- * @default {"vipVar":"81","feeRateVar":"82","thresholds":"{\"vip1\":\"1000000\",\"vip2\":\"5000000\",\"vip3\":\"20000000\",\"vip4\":\"50000000\",\"vip5\":\"100000000\"}","feeRates":"{\"vip0\":\"0.008\",\"vip1\":\"0.006\",\"vip2\":\"0.005\",\"vip3\":\"0.004\",\"vip4\":\"0.003\",\"vip5\":\"0.001\"}"}
+ * @default {"vipVar":"81","feeRateVar":"82","thresholds":"{\"vip1\":\"500000\",\"vip2\":\"2000000\",\"vip3\":\"5000000\",\"vip4\":\"10000000\",\"vip5\":\"20000000\",\"vip6\":\"50000000\",\"vip7\":\"100000000\"}","feeRates":"{\"vip0\":\"0.005\",\"vip1\":\"0.004\",\"vip2\":\"0.003\",\"vip3\":\"0.001\",\"vip4\":\"0.0008\",\"vip5\":\"0.0005\",\"vip6\":\"0.0003\",\"vip7\":\"0.0001\"}"}
 
  * @param contractSettings
  * @text 10. 合约设置
@@ -76,19 +76,19 @@
 
  * @command DepositCash
  * @text 存入现金
- * @desc 事件中先用“数值输入处理”存入金额到变量68，然后调用(>可用自动存全部)。
+ * @desc 事件中先用“数值输入处理”存入金额到变量69，然后调用(>可用自动存全部)。
 
  * @command WithdrawCash
  * @text 取出现金
- * @desc 同上，输入金额到68(>可用自动取全部)。
+ * @desc 同上，输入金额到69(>可用自动取全部)。
 
  * @command BuyStock
  * @text 购买股票
- * @desc 事件中输入代码到69，数量到68，然后调用(无效代码提示)。
+ * @desc 事件中输入代码到68，数量到69，然后调用(无效代码提示)。
 
  * @command SellStock
  * @text 出售股票
- * @desc 事件中输入代码到69，数量到68(0=全部)，调用部分/全部出售该股票(无效代码提示)。
+ * @desc 事件中输入代码到68，数量到69(0=全部)，调用部分/全部出售该股票(无效代码提示)。
 
  * @command ClearAllHoldings
  * @text 一键清仓
@@ -100,19 +100,19 @@
 
  * @command QuerySingleHolding
  * @text 查询个股持仓
- * @desc 事件中输入代码到69，显示个股详情(持股/成本/当前/盈亏/日周月涨跌)。
+ * @desc 事件中输入代码到68，显示个股详情(持股/成本/当前/盈亏/日周月涨跌)。
 
  * @command QueryStockPrice
  * @text 个股查询
- * @desc 事件中输入代码到69，显示价格(不存在提示空)。
+ * @desc 事件中输入代码到68，显示价格(不存在提示空)。
 
  * @command QueryCompanyInfo
  * @text 公司信息
- * @desc 事件中输入代码到69，显示对应代码的公司信息(不存在提示空)。
+ * @desc 事件中输入代码到68，显示对应代码的公司信息(不存在提示空)。
 
  * @command QueryHistory
  * @text 历史查询
- * @desc 事件中先输入代码到69，再输入天数到68，显示指定股票最近N交易日价格变化(首末/平均)。
+ * @desc 事件中先输入代码到68，再输入天数到69，显示指定股票最近N交易日价格变化(首末/平均)。
 
  * @command QueryFeeRate
  * @text 查询手续费率
@@ -130,20 +130,6 @@
  * @command CheckTimeUpdate
  * @text 检查时间更新
  * @desc 手动检查时间变化并更新股价(用于事件中时间变化后，提高兼容性)。
-
- * @command SetSpecialTime
- * @arg identifier
- * @text 事件标识
- * @type string
- * @default 利好
- * @arg duration
- * @text 持续周期
- * @type number
- * @default 1
- * @arg affectedStocks
- * @text 影响股票
- * @type string[]
- * @default ["001"]
 
  * @command GlobalMarket
  * @text 全局行情
@@ -207,23 +193,23 @@
 
  * @command DepositMargin
  * @text 转入保证金
- * @desc 从股市账户转入保证金到合约账户。输入金额到73。
+ * @desc 从股市账户转入保证金到合约账户。输入金额到69。
 
  * @command WithdrawMargin
  * @text 转出保证金
- * @desc 从合约账户转出保证金到股市账户。输入金额到73。
+ * @desc 从合约账户转出保证金到股市账户。输入金额到69。
 
  * @command OpenLong
  * @text 开多仓
- * @desc 开仓做多。输入代码到74，数量到73，杠杆到75。
+ * @desc 开仓做多。输入代码到68，数量到69，杠杆到75。
 
  * @command OpenShort
  * @text 开空仓
- * @desc 开仓做空。输入代码到74，数量到73，杠杆到75。
+ * @desc 开仓做空。输入代码到68，数量到69，杠杆到75。
 
  * @command ClosePosition
  * @text 平仓
- * @desc 平仓合约。输入代码到74，数量到73(0=全部)。
+ * @desc 平仓合约。输入代码到68，数量到69(0=全部)。
 
  * @command QueryPositions
  * @text 查询全部合约持仓
@@ -231,7 +217,7 @@
 
  * @command QuerySinglePosition
  * @text 查询单个合约持仓
- * @desc 输入代码到74，显示详情。
+ * @desc 输入代码到68，显示详情。
 
  * @command PlaceOrder
  * @text 挂委托单
@@ -299,6 +285,11 @@
  * @type number
  * @default 0
  * @desc 价格达到时自动平仓（>0有效）。
+ * @arg stopLossPrice
+ * @text 止损价
+ * @type number
+ * @default 0
+ * @desc 价格达到时自动平仓（>0有效）。
 
  * @command QueryFundingRate
  * @text 查询资金费率
@@ -330,7 +321,7 @@
 
  * @command QueryContractHistory
  * @text 查询合约历史
- * @desc 查询单个合约的OHLC历史。输入代码到74。
+ * @desc 查询单个合约的OHLC历史。输入代码到68。
  * @arg numPeriods
  * @text 显示周期数
  * @type number
@@ -342,7 +333,7 @@
  * - 交易/更新仅营业时；ST: 价格<5加"ST*"前缀，>=5恢复。
  * - 代码列表: 固定3支，自定义点击+号添加空项，填写code/name等；"公司信息"为多行文本框，支持详细描述(输入时用Enter换行，游戏显示智能分行)；"信息设置"自定义每行字符数(默认25)。
  * - 存入/取出: 0或负用无效提示；>可用自动存/取全部，并用自定义消息。
- * - 购买/出售/个股查询/历史查询/公司信息: 用事件“数值输入”存代码到var69(3位，如001)，数量/天数到var68，再调用指令。
+ * - 购买/出售/个股查询/历史查询/公司信息: 用事件“数值输入”存代码到var68(3位，如001)，数量/天数到var69，再调用指令。
  * - 查询持仓: QueryAllHoldings(概览)，QuerySingleHolding(个股，输入code)。
  * - 查询费率: QueryFeeRate(显示VIP+费率，可存变量)；手续费率自动存入var82。
  * - 行情: GlobalMarket(全局)/SingleMarket(个股)，加成临时buff，持续年月日(总更新次数≈天数)。
@@ -350,7 +341,7 @@
  * - 事件中时间变化后，用"CheckTimeUpdate"指令手动更新股价(或自动每秒检查)。
  * - 调试: F8查看日志(新增错误日志)。
  * - 新: 个股查询支持短代码(1→001)/存取优化/兼容性提升(独立save try)/读档修复/输入0提示/实时更新/持仓修复/循环时间修复/行情buff/持仓查询优化/VIP+手续费/费率查询/手续费变量/历史交易日优化/公司信息参数&指令(多行输入+智能分行+自定义宽度)。
- * - 合约扩展: 无休市限制，使用原股票价格。输入变量: 数量73、代码74、杠杆75。持仓/委托存变量72/56(或存档对象)。每小时检查止损/爆仓/费率/委托执行。
+ * - 合约扩展: 无休市限制，使用原股票价格。输入变量: 数量69、代码68、杠杆75。持仓/委托存变量72/56(或存档对象)。每小时检查止损/爆仓/费率/委托执行。
  */
 
 /*~struct~VariablesStruct:
@@ -392,12 +383,12 @@
  * @param inputAmountVar
  * @text 输入数量/天数变量
  * @type variable
- * @default 68
+ * @default 69
 
  * @param inputCodeVar
  * @text 输入股票代码变量
  * @type variable
- * @default 69
+ * @default 68
 
  * @param contractMarginVar
  * @text 保证金账户
@@ -408,16 +399,6 @@
  * @text 合约持仓记录
  * @type variable
  * @default 72
-
- * @param contractInputAmountVar
- * @text 合约输入数量
- * @type variable
- * @default 73
-
- * @param contractInputCodeVar
- * @text 合约输入代码
- * @type variable
- * @default 74
 
  * @param contractInputLeverageVar
  * @text 合约输入杠杆
@@ -728,15 +709,15 @@
  * @param businessPeriods
  * @text 营业时段
  * @type select[]
- * @option 上午(1)
+ * @option 凌晨(1)
  * @value 1
- * @option 下午(2)
+ * @option 上午(2)
  * @value 2
- * @option 傍晚(3)
+ * @option 下午(3)
  * @value 3
- * @option 深夜(4)
+ * @option 傍晚(4)
  * @value 4
- * @default ["1","2"]
+ * @default ["2","3"]
 
  * @param businessWeeks
  * @text 营业星期
@@ -833,35 +814,6 @@
 
  */
 
-/*~struct~SpecialEvent:
- * @param identifier
- * @text 标识
- * @type string
- * @default 春节
-
- * @param affectedStocks
- * @text 影响股票
- * @type string[]
- * @default ["001"]
-
- * @param effectType
- * @text 类型
- * @type select
- * @option 强制上涨
- * @value force_up
- * @option 强制下跌
- * @value force_down
- * @option 概率翻倍
- * @value double_prob
- * @option 暂停
- * @value pause
-
- * @param duration
- * @text 持续周期
- * @type number
- * @default 1
- */
-
 /*~struct~TradeSettingsStruct:
  * @param vipVar
  * @text VIP变量ID
@@ -878,14 +830,14 @@
  * @param thresholds
  * @text VIP阈值
  * @type string
- * @default {"vip1":"1000000","vip2":"5000000","vip3":"20000000","vip4":"50000000","vip5":"100000000"}
- * @desc JSON: {vip1:1000000, vip2:5000000, ...}，总资产超过即升级。
+ * @default {"vip1":500000,"vip2":2000000,"vip3":5000000,"vip4":10000000,"vip5":20000000,"vip6":50000000,"vip7":100000000}
+ * @desc JSON: {vip1:500000, vip2:2000000, ...}，总资产超过即升级。
 
  * @param feeRates
  * @text 手续费率
  * @type string
- * @default {"vip0":"0.008","vip1":"0.006","vip2":"0.005","vip3":"0.004","vip4":"0.003","vip5":"0.001"}
- * @desc JSON: {vip0:0.008, vip1:0.006, ...}，小数形式(0.008=0.8%)。
+ * @default {"vip0":0.005,"vip1":0.004,"vip2":0.003,"vip3":0.001,"vip4":0.0008,"vip5":0.0005,"vip6":0.0003,"vip7":0.0001}
+ * @desc JSON: {vip0:0.005, vip1:0.004, ...}，小数形式(0.005=0.5%)。
  */
 
 /*~struct~ContractSettingsStruct:
@@ -1031,7 +983,6 @@
     let esm_stock2 = safeJsonParse(parameters['stock2'] || '{}');
     let esm_stock3 = safeJsonParse(parameters['stock3'] || '{}');
     let esm_customStocks = (JSON.parse(parameters['customStocks'] || '[]') || []).map(safeJsonParse);
-    let esm_specialEvents = JSON.parse(parameters['specialEvents'] || '[]');
     let esm_tradeSettings = safeJsonParse(parameters['tradeSettings'] || '{}');
     let esm_contractSettings = safeJsonParse(parameters['contractSettings'] || '{}');
 
@@ -1061,12 +1012,12 @@
     const esm_stockAvgBuyPricesVar = Number(esm_variables.stockAvgBuyPricesVar || 65);
     const esm_tradeLogVar = Number(esm_variables.tradeLogVar || 66);
     const esm_priceHistoryVar = Number(esm_variables.priceHistoryVar || 67);
-    const esm_inputAmountVar = Number(esm_variables.inputAmountVar || 68);
-    const esm_inputCodeVar = Number(esm_variables.inputCodeVar || 69);
+    const esm_inputAmountVar = Number(esm_variables.inputAmountVar || 69);
+    const esm_inputCodeVar = Number(esm_variables.inputCodeVar || 68);
+    const esm_vipVar = Number(esm_tradeSettings.vipVar || 81);
+    const esm_feeRateVar = Number(esm_tradeSettings.feeRateVar || 82);
     const esm_contractMarginVar = Number(esm_variables.contractMarginVar || 71);
     const esm_contractPositionsVar = Number(esm_variables.contractPositionsVar || 72);
-    const esm_contractInputAmountVar = Number(esm_variables.contractInputAmountVar || 73);
-    const esm_contractInputCodeVar = Number(esm_variables.contractInputCodeVar || 74);
     const esm_contractInputLeverageVar = Number(esm_variables.contractInputLeverageVar || 75);
     const esm_contractInputStopLossVar = Number(esm_variables.contractInputStopLossVar || 76);
     const esm_contractInputTakeProfitVar = Number(esm_variables.contractInputTakeProfitVar || 77);
@@ -1074,6 +1025,7 @@
     const esm_contractHistoryVar = Number(esm_variables.contractHistoryVar || 78);
     const esm_contractLongFundingRateVar = Number(esm_variables.contractLongFundingRateVar || 79);
     const esm_contractShortFundingRateVar = Number(esm_variables.contractShortFundingRateVar || 80);
+    const esm_cumulativeDepositVar = 83;
 
     // 其他
     const esm_updateCycle = esm_volatility.updateCycle || 'hour';
@@ -1097,14 +1049,13 @@
     let esm_shortFundingRate = Number(esm_contractSettings.shortFundingRate || 0.0001);
 
     // VIP阈值和费率
-    const esm_vipThresholds = safeJsonParse(esm_tradeSettings.thresholds || '{"vip1":1000000,"vip2":5000000,"vip3":20000000,"vip4":50000000,"vip5":100000000}');
-    const esm_feeRates = safeJsonParse(esm_tradeSettings.feeRates || '{"vip0":0.008,"vip1":0.006,"vip2":0.005,"vip3":0.004,"vip4":0.003,"vip5":0.001}');
+    const esm_vipThresholds = safeJsonParse(esm_tradeSettings.thresholds || '{"vip1":500000,"vip2":2000000,"vip3":5000000,"vip4":10000000,"vip5":20000000,"vip6":50000000,"vip7":100000000}');
+    const esm_feeRates = safeJsonParse(esm_tradeSettings.feeRates || '{"vip0":0.005,"vip1":0.004,"vip2":0.003,"vip3":0.001,"vip4":0.0008,"vip5":0.0005,"vip6":0.0003,"vip7":0.0001}');
 
     // 常量
     const esm_DAYS_PER_MONTH = 30;
     const esm_DAYS_PER_WEEK = 7;
     const esm_PERIODS_PER_DAY = 4;
-    const esm_HOURS_PER_DAY = 24;
     const esm_MAX_LOGS = 100;
     const esm_DAYS_PER_YEAR = 365;
 
@@ -1148,7 +1099,6 @@
             this.esm_avgBuyPrices = {};
             this.esm_history = {}; // {code: [{day: YYYY-MM-DD, prices: [], avg: num, change: '%'}]}
             this.esm_logs = [];
-            this.esm_specialActive = {};
             this.esm_marketBuffs = { global: {prob: 0, upAmp: 0, downAmp: 0, remaining: 0}, singles: {} };
             this.esm_lastUpdate = { year: 0, month: 0, day: 0, week: 0, period: 0, hour: 0 };
             this.esm_trendCounters = {};
@@ -1164,6 +1114,7 @@
             this.esm_shortFundingRate = esm_shortFundingRate;
             this.esm_lastHour = 1;
             this.esm_lastCheckFrame = 0;
+            this.esm_cumulativeDeposit = 0;
             this.esm_initStocks(esm_stockList);
         }
 
@@ -1208,6 +1159,9 @@
                 { id: esm_stockAvgBuyPricesVar, value: JSON.stringify(this.esm_avgBuyPrices) },
                 { id: esm_tradeLogVar, value: JSON.stringify(this.esm_logs) },
                 { id: esm_priceHistoryVar, value: JSON.stringify(this.esm_history) },
+                { id: esm_vipVar, value: this.esm_getCurrentVIP() },
+                { id: esm_feeRateVar, value: this.esm_getCurrentFeeRate().rate },
+                { id: esm_cumulativeDepositVar, value: this.esm_cumulativeDeposit },
                 // 合约
                 { id: esm_contractMarginVar, value: this.esm_margin },
                 { id: esm_contractLongFundingRateVar, value: this.esm_longFundingRate },
@@ -1246,6 +1200,8 @@
                 this.esm_initStocks(esm_stockList);
                 this.esm_logs = this.esm_logs.slice(0, esm_MAX_LOGS);
                 this.esm_updateSTStatus();
+                this.esm_cumulativeDeposit = $gameVariables.value(esm_cumulativeDepositVar) || 0;
+                this.esm_calculateVIP();
                 // 合约加载
                 this.esm_margin = $gameVariables.value(esm_contractMarginVar) || Number(esm_contractSettings.initialMargin) || 0;
                 this.esm_longFundingRate = $gameVariables.value(esm_contractLongFundingRateVar) || esm_longFundingRate;
@@ -1263,6 +1219,8 @@
             } catch (e) {
                 console.error('Expand_Stockmarket: Load failed', e);
                 this.esm_initStocks(esm_stockList);
+                this.esm_cumulativeDeposit = 0;
+                this.esm_calculateVIP();
                 // 合约重置
                 this.esm_margin = Number(esm_contractSettings.initialMargin) || 0;
                 this.esm_positions = {};
@@ -1278,12 +1236,12 @@
 
         esm_getCurrentTime() {
             return {
-                year: $gameVariables.value(esm_yearVar),
-                month: $gameVariables.value(esm_monthVar),
-                day: $gameVariables.value(esm_dayVar),
-                week: $gameVariables.value(esm_weekVar),
-                period: $gameVariables.value(esm_periodVar),
-                hour: $gameVariables.value(esm_hourVar)
+				year: $gameVariables.value(esm_yearVar),
+				month: $gameVariables.value(esm_monthVar),
+				day: $gameVariables.value(esm_dayVar),
+				week: $gameVariables.value(esm_weekVar),
+				period: $gameVariables.value(esm_periodVar),
+				hour: $gameVariables.value(esm_hourVar)
             };
         }
 
@@ -1306,20 +1264,17 @@
 
         esm_calcDelta(last, current, cycle) {
             let delta = 0;
+            if (cycle === 'period') {
+                const totalLast = last.day * esm_PERIODS_PER_DAY + last.period;
+                const totalCurrent = current.day * esm_PERIODS_PER_DAY + current.period;
+                delta = totalCurrent - totalLast;
+                return Math.max(0, delta);
+            }
             switch (cycle) {
-                case 'hour':
-                    const totalLastHour = ((last.year * esm_DAYS_PER_YEAR + last.month * esm_DAYS_PER_MONTH + last.day) * esm_HOURS_PER_DAY) + last.hour;
-                    const totalCurrentHour = ((current.year * esm_DAYS_PER_YEAR + current.month * esm_DAYS_PER_MONTH + current.day) * esm_HOURS_PER_DAY) + current.hour;
-                    delta = totalCurrentHour - totalLastHour;
-                    break;
-                case 'period':
-                    const totalLastPeriod = last.day * esm_PERIODS_PER_DAY + last.period;
-                    const totalCurrentPeriod = current.day * esm_PERIODS_PER_DAY + current.period;
-                    delta = totalCurrentPeriod - totalLastPeriod;
-                    break;
-                case 'day': delta = current.day - last.day; break;
-                case 'week': delta = current.week - last.week; break;
-                case 'month': delta = current.month - last.month; break;
+					case 'day': delta = current.day - last.day; break;
+					case 'week': delta = current.week - last.week; break;
+					case 'month': delta = current.month - last.month; break;
+					case 'hour': delta = current.hour - last.hour; break;
             }
             return Math.max(0, delta);
         }
@@ -1391,16 +1346,6 @@
             const counters = this.esm_trendCounters[stock.code] || { up: 0, down: 0 };
             if (counters.down >= 3) prob += 30;
             if (counters.up >= 3) prob -= 30;
-            let specialMult = 1;
-            for (let id in this.esm_specialActive) {
-                if (this.esm_specialActive[id].stocks.includes(stock.code) && this.esm_specialActive[id].remaining > 0) {
-                    if (this.esm_specialActive[id].effect === 'double_prob') specialMult = 2;
-                    this.esm_specialActive[id].remaining--;
-                    if (this.esm_specialActive[id].remaining <= 0) delete this.esm_specialActive[id];
-                    break;
-                }
-            }
-            prob *= specialMult;
             return Math.max(0, Math.min(100, prob));
         }
 
@@ -1413,28 +1358,9 @@
             const counters = this.esm_trendCounters[code] || { up: 0, down: 0 };
             const buff = this.esm_getMarketBuff(code);
 
-            let specialEffect = null;
-            for (let id in this.esm_specialActive) {
-                if (this.esm_specialActive[id].stocks.includes(code) && this.esm_specialActive[id].remaining > 0) {
-                    specialEffect = this.esm_specialActive[id].effect;
-                    break;
-                }
-            }
-
-            let isUp, changeAmp;
-            if (specialEffect === 'force_up') {
-                isUp = true;
-                changeAmp = Math.floor(Math.random() * Number(stock.upAmp)) + 1;
-            } else if (specialEffect === 'force_down') {
-                isUp = false;
-                changeAmp = Math.floor(Math.random() * Number(stock.downAmp)) + 1;
-            } else if (specialEffect === 'pause') {
-                return;
-            } else {
-                const upProb = this.esm_calcUpProb(stock);
-                isUp = Math.random() * 100 < upProb;
-                changeAmp = Math.floor(Math.random() * (isUp ? Number(stock.upAmp) : Number(stock.downAmp))) + 1;
-            }
+            const upProb = this.esm_calcUpProb(stock);
+            const isUp = Math.random() * 100 < upProb;
+            let changeAmp = Math.floor(Math.random() * (isUp ? Number(stock.upAmp) : Number(stock.downAmp))) + 1;
             changeAmp += isUp ? buff.upAmp : buff.downAmp;
 
             const change = Math.floor(currentPrice * (changeAmp / 100));
@@ -1488,18 +1414,11 @@
 
         esm_calculateVIP() {
             try {
-                let totalAssets = this.esm_account;
-                esm_stockList.forEach(stock => {
-                    const code = stock.code;
-                    const hold = this.esm_holdings[code] || 0;
-                    if (hold > 0) {
-                        totalAssets += hold * this.esm_prices[code];
-                    }
-                });
+                const cumulativeDeposit = this.esm_cumulativeDeposit;
                 let vipLevel = 0;
-                for (let level = 5; level >= 1; level--) {
+                for (let level = 7; level >= 1; level--) {
                     const threshold = Number(esm_vipThresholds[`vip${level}`]) || Infinity;
-                    if (totalAssets >= threshold) {
+                    if (cumulativeDeposit >= threshold) {
                         vipLevel = level;
                         break;
                     }
@@ -1511,19 +1430,19 @@
             } catch (e) {
                 console.error('Expand_Stockmarket: VIP calculation failed', e);
                 esm_safeSetValue(esm_vipVar, 0);
-                esm_safeSetValue(esm_feeRateVar, 0.008);
+                esm_safeSetValue(esm_feeRateVar, 0.005);
                 return 0;
             }
         }
 
         esm_getCurrentVIP() {
             const vip = $gameVariables.value(esm_vipVar);
-            return Math.max(0, Math.min(5, Number(vip) || this.esm_calculateVIP()));
+            return Math.max(0, Math.min(7, Number(vip) || this.esm_calculateVIP()));
         }
 
         esm_getFeeRate(vip) {
             const vipKey = `vip${vip}`;
-            return Number(esm_feeRates[vipKey]) || 0.008;
+            return Number(esm_feeRates[vipKey]) || 0.005;
         }
 
         esm_getCurrentFeeRate() {
@@ -1562,7 +1481,7 @@
             if (esm_debugLog) console.log('Expand_Stockmarket: Funding rates set to', this.esm_longFundingRate, this.esm_shortFundingRate);
         }
 
-        esm_calculateFee(amount, rate = esm_transactionFeeRate) {
+        esm_calculateFee(amount, rate = this.esm_getCurrentFeeRate().rate) {
             return Math.floor(amount * rate);
         }
 
@@ -1578,6 +1497,11 @@
             if (esm_debugLog) console.log('Expand_Stockmarket: Single buff applied for', code, 'remaining days:', totalDays);
         }
 
+        esm_addLog(entry) {
+            this.esm_logs.unshift(entry);
+            if (this.esm_logs.length > esm_MAX_LOGS) this.esm_logs.pop();
+        }
+
         esm_depositCash(amount) {
             if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedMessage);
             const gold = $gameParty.gold();
@@ -1589,6 +1513,7 @@
                 isExceed = true;
             }
             this.esm_account += actualAmount;
+            this.esm_cumulativeDeposit += actualAmount;
             $gameParty.gainGold(-actualAmount);
             this.esm_addLog(`存入 ${actualAmount}金币`);
             this.esm_calculateVIP();
@@ -1701,6 +1626,7 @@
         }
 
         esm_queryAllHoldings() {
+            this.esm_calculateVIP();
             let totalTypes = 0;
             let totalPnl = 0;
             let totalCost = 0;
@@ -1731,6 +1657,7 @@
         }
 
         esm_querySingleHolding() {
+            this.esm_calculateVIP();
             const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
             const code = rawCode.toString().padStart(3, '0');
@@ -2066,7 +1993,7 @@
         }
 
         esm_querySinglePosition() {
-            const rawCode = $gameVariables.value(esm_contractInputCodeVar);
+            const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
             const code = rawCode.toString().padStart(3, '0');
             if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
@@ -2123,7 +2050,7 @@
         }
 
         esm_queryContractHistory(numPeriods = 10) {
-            const rawCode = $gameVariables.value(esm_contractInputCodeVar);
+            const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
             const code = rawCode.toString().padStart(3, '0');
             if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
@@ -2166,13 +2093,6 @@
                     break;
                 case 'UpdatePrice': this.esm_updateAllPrices(1); break;
                 case 'CheckTimeUpdate': this.esm_checkAndUpdatePrices(); break;
-                case 'SetSpecialTime':
-                    const id = args.identifier;
-                    const dur = Number(args.duration || 1);
-                    const stocks = JSON.parse(args.affectedStocks || '["001"]');
-                    const event = esm_specialEvents.find(e => e.identifier === id) || { effectType: 'force_up' };
-                    this.esm_specialActive[id] = { stocks, effect: event.effectType, remaining: dur };
-                    break;
                 case 'GlobalMarket':
                     this.esm_setGlobalMarket(args.prob, args.upAmp, args.downAmp, args.durationYears, args.durationMonths, args.durationDays);
                     break;
@@ -2180,19 +2100,19 @@
                     this.esm_setSingleMarket(args.code, args.prob, args.upAmp, args.downAmp, args.durationYears, args.durationMonths, args.durationDays);
                     break;
                 // 合约命令
-                case 'DepositMargin': this.esm_depositMargin($gameVariables.value(esm_contractInputAmountVar)); break;
-                case 'WithdrawMargin': this.esm_withdrawMargin($gameVariables.value(esm_contractInputAmountVar)); break;
+                case 'DepositMargin': this.esm_depositMargin($gameVariables.value(esm_inputAmountVar)); break;
+                case 'WithdrawMargin': this.esm_withdrawMargin($gameVariables.value(esm_inputAmountVar)); break;
                 case 'OpenLong': 
-                    const longCode = $gameVariables.value(esm_contractInputCodeVar).toString().padStart(3, '0');
-                    this.esm_openPosition('long', longCode, $gameVariables.value(esm_contractInputAmountVar), $gameVariables.value(esm_contractInputLeverageVar)); 
+                    const longCode = $gameVariables.value(esm_inputCodeVar).toString().padStart(3, '0');
+                    this.esm_openPosition('long', longCode, $gameVariables.value(esm_inputAmountVar), $gameVariables.value(esm_contractInputLeverageVar)); 
                     break;
                 case 'OpenShort': 
-                    const shortCode = $gameVariables.value(esm_contractInputCodeVar).toString().padStart(3, '0');
-                    this.esm_openPosition('short', shortCode, $gameVariables.value(esm_contractInputAmountVar), $gameVariables.value(esm_contractInputLeverageVar)); 
+                    const shortCode = $gameVariables.value(esm_inputCodeVar).toString().padStart(3, '0');
+                    this.esm_openPosition('short', shortCode, $gameVariables.value(esm_inputAmountVar), $gameVariables.value(esm_contractInputLeverageVar)); 
                     break;
                 case 'ClosePosition': 
-                    const closeCode = $gameVariables.value(esm_contractInputCodeVar).toString().padStart(3, '0');
-                    this.esm_closePosition(closeCode, $gameVariables.value(esm_contractInputAmountVar)); 
+                    const closeCode = $gameVariables.value(esm_inputCodeVar).toString().padStart(3, '0');
+                    this.esm_closePosition(closeCode, $gameVariables.value(esm_inputAmountVar)); 
                     break;
                 case 'QueryPositions': this.esm_queryPositions(); break;
                 case 'QuerySinglePosition': this.esm_querySinglePosition(); break;
@@ -2239,7 +2159,6 @@
     PluginManager.registerCommand('Expand_Stockmarket', 'QueryFeeRate', args => esm_manager.esm_execCommand('QueryFeeRate', args));
     PluginManager.registerCommand('Expand_Stockmarket', 'UpdatePrice', () => esm_manager.esm_execCommand('UpdatePrice'));
     PluginManager.registerCommand('Expand_Stockmarket', 'CheckTimeUpdate', () => esm_manager.esm_execCommand('CheckTimeUpdate'));
-    PluginManager.registerCommand('Expand_Stockmarket', 'SetSpecialTime', args => esm_manager.esm_execCommand('SetSpecialTime', args));
     PluginManager.registerCommand('Expand_Stockmarket', 'GlobalMarket', args => esm_manager.esm_execCommand('GlobalMarket', args));
     PluginManager.registerCommand('Expand_Stockmarket', 'SingleMarket', args => esm_manager.esm_execCommand('SingleMarket', args));
     // 合约
