@@ -28,7 +28,7 @@
  * @param volatility
  * @text 2. 涨跌设置
  * @type struct<VolatilityStruct>
- * @default {"updateCycle":"hour","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","maxUpAmp":"10","maxDownAmp":"10","historyPeriods":"30","stThreshold":"5"}
+ * @default {"updateCycle":"period","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","maxUpAmp":"10","maxDownAmp":"10","historyPeriods":"30","stThreshold":"5"}
 
  * @param messages
  * @text 3. 文本设置
@@ -707,7 +707,8 @@
  * @param closedTradeMessage
  * @text 非营业交易提示
  * @type string
- * @default 非营业时间，请开市再试！
+ * @default 非
+ ，请开市再试！
  */
 
 /*~struct~BusinessStruct:
@@ -725,7 +726,7 @@
  * @value 2
  * @option 下午(3)
  * @value 3
- * @option 深夜(4)
+ * @option 傍晚(4)
  * @value 4
  * @default ["2","3"]
 
@@ -1042,7 +1043,7 @@
     const esm_updateTrigger = esm_volatility.updateTrigger || 'both';
     const esm_crossCycleRule = esm_volatility.crossCycleRule || 'sequential';
     const esm_enableBusinessHours = esm_business.enableBusinessHours === 'true';
-    const esm_businessPeriods = JSON.parse(esm_business.businessPeriods || '["1","2"]') .map(Number);
+    const esm_businessPeriods = JSON.parse(esm_business.businessPeriods || '["2","3"]') .map(Number);
     const esm_businessWeeks = JSON.parse(esm_business.businessWeeks || '["1","2","3","4","5"]') .map(Number);
     const esm_globalUpProb = Number(esm_volatility.globalUpProb || 50);
     const esm_maxUpAmp = Number(esm_volatility.maxUpAmp || 50);
@@ -1513,7 +1514,6 @@
         }
 
         esm_depositCash(amount) {
-            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedMessage);
             const gold = $gameParty.gold();
             if (isNaN(amount) || amount <= 0) return $gameMessage.add(esm_messages.invalidAmount);
             let actualAmount = amount;
@@ -1536,7 +1536,6 @@
         }
 
         esm_withdrawCash(amount) {
-            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedMessage);
             if (isNaN(amount) || amount <= 0) return $gameMessage.add(esm_messages.invalidAmount);
             let actualAmount = amount;
             let isExceed = false;
@@ -1836,7 +1835,6 @@
         }
 
         esm_closePosition(code, quantity = 0, dir = null, internal = false) {
-            if (!internal && !this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedTradeMessage);
             try {
                 const stock = esm_stockList.find(s => s.code === code);
                 if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
