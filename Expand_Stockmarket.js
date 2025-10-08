@@ -23,22 +23,22 @@
  * @param variables
  * @text 1. 变量设置
  * @type struct<VariablesStruct>
- * @default {"timeSettings":"{\"yearVar\":\"23\",\"monthVar\":\"24\",\"dayVar\":\"25\",\"weekVar\":\"27\",\"periodVar\":\"28\",\"hourVar\":\"26\"}","stockAccountVar":"62","stockHoldingsVar":"63","stockPricesVar":"64","stockAvgBuyPricesVar":"65","tradeLogVar":"66","priceHistoryVar":"67","inputAmountVar":"69","inputCodeVar":"68","contractMarginVar":"71","contractPositionsVar":"72","contractInputLeverageVar":"75","contractInputStopLossVar":"76","contractInputTakeProfitVar":"77","contractOrdersVar":"73","contractHistoryVar":"78","contractLongFundingRateVar":"79","contractShortFundingRateVar":"80"}
+ * @default {"timeSettings":"{\"yearVar\":\"23\",\"monthVar\":\"24\",\"dayVar\":\"25\",\"weekVar\":\"27\",\"periodVar\":\"28\",\"hourVar\":\"26\"}","stockAccountVar":"62","stockHoldingsVar":"63","stockPricesVar":"64","stockAvgBuyPricesVar":"65","tradeLogVar":"66","priceHistoryVar":"67","inputAmountVar":"69","inputCodeVar":"68","contractMarginVar":"71","contractPositionsVar":"72","contractInputLeverageVar":"75","contractInputStopLossVar":"76","contractInputTakeProfitVar":"77","contractOrdersVar":"73","contractHistoryVar":"78","contractLongFundingRateVar":"79","contractShortFundingRateVar":"80","cumulativeDepositVar":"83"}
 
  * @param volatility
  * @text 2. 涨跌设置
  * @type struct<VolatilityStruct>
- * @default {"updateCycle":"period","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","maxUpAmp":"10","maxDownAmp":"10","historyPeriods":"30","stThreshold":"5"}
+ * @default {"updateCycle":"hour","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","maxUpAmp":"10","maxDownAmp":"10","historyPeriods":"30","stThreshold":"5"}
 
  * @param messages
  * @text 3. 文本设置
  * @type struct<MessagesStruct>
- * @default {"closedMessage":"当前时段休市，请在上午或下午再来","insufficientGold":"金币不足！您只有 %1 金币，无法存入 %2。","invalidAmount":"无效金额，请输入正数。","depositSuccess":"存入成功！资金账户余额：%1 金币。","depositExceed":"金币不足，只有 %1，已存入全部。","withdrawInsufficient":"账户余额不足！资金账户只有 %1 金币，无法取出 %2。","withdrawSuccess":"取出成功！玩家金币增加 %1。","withdrawExceed":"余额不足，只有 %1，已取出全部。","buyInsufficient":"账户余额或数量不足！","buySuccess":"购买成功！持有%1：%2股。","sellInsufficient":"持有数量不足！","sellSuccess":"出售成功！账户增加 %1 金币。","noHoldings":"您目前没有持有任何股票。","stockNotFound":"股票代码不存在，查询为空。","invalidStockCode":"无效股票代码！","stPrefix":"ST*","invalidQuantity":"选择正确的数量。","buyFeeInsufficient":"手续费不足！需额外 %1 金币。","buySuccessFee":"手续费：%1 金币。","sellSuccessFee":"（扣手续费 %1）。","feeRateMsg":"当前VIP等级：%1，手续费率：%2 (即%3%)。","marginInsufficient":"保证金不足！","marginTransferSuccess":"转入/转出成功！保证金余额：%1。","marginTransferFee":"手续费：%1。","openPositionSuccess":"开仓成功！方向：%1，数量：%2。","closePositionSuccess":"平仓成功！盈亏：%1。","stopLossTriggered":"止损触发，已自动平仓：%1。","liquidationTriggered":"爆仓强制平仓：%1，剩余保证金：%2。","fundingFeeDeducted":"扣取资金费率：%1。","invalidLeverage":"杠杆超出范围！使用默认值。","invalidPrice":"价格无效！","orderPlaced":"委托单已挂起：%1。","orderExecuted":"委托单执行：%1。","orderCancelled":"委托单取消：%1。","noPositions":"无持仓合约。","fundingRateMsg":"当前做多费率：%1，做空费率：%2。","stopLevelsSet":"止盈止损设置成功：止盈%1，止损%2。","noHistory":"无合约历史记录。"}
+ * @default {"closedMessage":"当前时段休市，请在上午或下午再来","insufficientGold":"金币不足！您只有 %1 金币，无法存入 %2。","invalidAmount":"无效金额，请输入正数。","depositSuccess":"存入成功！资金账户余额：%1 金币。","depositExceed":"金币不足，只有 %1，已存入全部。","withdrawInsufficient":"账户余额不足！资金账户只有 %1 金币，无法取出 %2。","withdrawSuccess":"取出成功！玩家金币增加 %1。","withdrawExceed":"余额不足，只有 %1，已取出全部。","buyInsufficient":"账户余额或数量不足！","buySuccess":"购买成功！持有%1：%2股。","sellInsufficient":"持有数量不足！","sellSuccess":"出售成功！账户增加 %1 金币。","noHoldings":"您目前没有持有任何股票。","stockNotFound":"股票代码不存在，查询为空。","invalidStockCode":"无效股票代码！","stPrefix":"ST*","invalidQuantity":"选择正确的数量。","buyFeeInsufficient":"手续费不足！需额外 %1 金币。","buySuccessFee":"手续费：%1 金币。","sellSuccessFee":"（扣手续费 %1）。","feeRateMsg":"当前VIP等级：%1，手续费率：%2 (即%3%)。","marginInsufficient":"保证金不足！","marginTransferSuccess":"转入/转出成功！保证金余额：%1。","marginTransferFee":"手续费：%1。","openPositionSuccess":"开仓成功！方向：%1，数量：%2。","closePositionSuccess":"平仓成功！盈亏：%1。","stopLossTriggered":"止损触发，已自动平仓：%1。","liquidationTriggered":"爆仓强制平仓：%1，剩余保证金：%2。","fundingFeeDeducted":"扣取资金费率：%1。","invalidLeverage":"杠杆超出范围！使用默认值。","invalidPrice":"价格无效！","orderPlaced":"委托单已挂起：%1。","orderExecuted":"委托单执行：%1。","orderCancelled":"委托单取消：%1。","noPositions":"无持仓合约。","fundingRateMsg":"当前做多费率：%1，做空费率：%2。","stopLevelsSet":"止盈止损设置成功：止盈%1，止损%2。","noHistory":"无合约历史记录。","closedTradeMessage":"非营业时间，请开市再试！"}
 
  * @param business
  * @text 4. 营业设置
  * @type struct<BusinessStruct>
- * @default {"enableBusinessHours":"true","businessPeriods":"[\"1\",\"2\"]","businessWeeks":"[\"1\",\"2\",\"3\",\"4\",\"5\"]"}
+ * @default {"enableBusinessHours":"true","businessPeriods":"[\"2\",\"3\"]","businessWeeks":"[\"1\",\"2\",\"3\",\"4\",\"5\"]"}
 
  * @param stock1
  * @text 5. 代码001
@@ -434,6 +434,11 @@
  * @text 做空资金费率
  * @type variable
  * @default 80
+
+ * @param cumulativeDepositVar
+ * @text 累计存款变量
+ * @type variable
+ * @default 83
  */
 
 /*~struct~VolatilityStruct:
@@ -698,6 +703,11 @@
  * @text 无历史
  * @type string
  * @default 无合约历史记录。
+
+ * @param closedTradeMessage
+ * @text 非营业交易提示
+ * @type string
+ * @default 非营业时间，请开市再试！
  */
 
 /*~struct~BusinessStruct:
@@ -709,15 +719,15 @@
  * @param businessPeriods
  * @text 营业时段
  * @type select[]
- * @option 上午(1)
+ * @option 凌晨(1)
  * @value 1
- * @option 下午(2)
+ * @option 上午(2)
  * @value 2
- * @option 傍晚(3)
+ * @option 下午(3)
  * @value 3
  * @option 深夜(4)
  * @value 4
- * @default ["1","2"]
+ * @default ["2","3"]
 
  * @param businessWeeks
  * @text 营业星期
@@ -1025,7 +1035,7 @@
     const esm_contractHistoryVar = Number(esm_variables.contractHistoryVar || 78);
     const esm_contractLongFundingRateVar = Number(esm_variables.contractLongFundingRateVar || 79);
     const esm_contractShortFundingRateVar = Number(esm_variables.contractShortFundingRateVar || 80);
-    const esm_cumulativeDepositVar = 81;
+    const esm_cumulativeDepositVar = Number(esm_variables.cumulativeDepositVar || 83);
 
     // 其他
     const esm_updateCycle = esm_volatility.updateCycle || 'hour';
@@ -1236,12 +1246,12 @@
 
         esm_getCurrentTime() {
             return {
-				year: $gameVariables.value(esm_yearVar),
-				month: $gameVariables.value(esm_monthVar),
-				day: $gameVariables.value(esm_dayVar),
-				week: $gameVariables.value(esm_weekVar),
-				period: $gameVariables.value(esm_periodVar),
-				hour: $gameVariables.value(esm_hourVar)
+                year: $gameVariables.value(esm_yearVar),
+                month: $gameVariables.value(esm_monthVar),
+                day: $gameVariables.value(esm_dayVar),
+                week: $gameVariables.value(esm_weekVar),
+                period: $gameVariables.value(esm_periodVar),
+                hour: $gameVariables.value(esm_hourVar)
             };
         }
 
@@ -1271,10 +1281,10 @@
                 return Math.max(0, delta);
             }
             switch (cycle) {
-				case 'day': delta = current.day - last.day; break;
-				case 'week': delta = current.week - last.week; break;
-				case 'month': delta = current.month - last.month; break;
-				case 'hour': delta = current.hour - last.hour; break;
+                case 'day': delta = current.day - last.day; break;
+                case 'week': delta = current.week - last.week; break;
+                case 'month': delta = current.month - last.month; break;
+                case 'hour': delta = current.hour - last.hour; break;
             }
             return Math.max(0, delta);
         }
@@ -1547,7 +1557,7 @@
         }
 
         esm_buyStock(code, amount) {
-            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedMessage);
+            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedTradeMessage);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
             if (isNaN(amount) || amount <= 0) return $gameMessage.add(esm_messages.invalidQuantity);
@@ -1573,7 +1583,7 @@
         }
 
         esm_sellStock(code, amount = 0) {
-            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedMessage);
+            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedTradeMessage);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
             let amt = amount;
@@ -1599,7 +1609,7 @@
         }
 
         esm_clearAllHoldings() {
-            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedMessage);
+            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedTradeMessage);
             let totalNet = 0;
             let totalFee = 0;
             const vip = this.esm_calculateVIP();
@@ -1779,6 +1789,7 @@
         }
 
         esm_openPosition(direction, code, quantity, leverage) {
+            if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedTradeMessage);
             try {
                 const stock = esm_stockList.find(s => s.code === code);
                 if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
@@ -1825,6 +1836,7 @@
         }
 
         esm_closePosition(code, quantity = 0, dir = null, internal = false) {
+            if (!internal && !this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedTradeMessage);
             try {
                 const stock = esm_stockList.find(s => s.code === code);
                 if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
@@ -1840,7 +1852,7 @@
                     if (closeQty > pos.quantity) closeQty = pos.quantity;
                     const price = this.esm_prices[code];
                     const basePnl = (price - pos.entryPrice) * closeQty * (direction === 'long' ? 1 : -1);
-                    pnl += basePnl * pos.leverage;
+                    pnl += basePnl;
                     releasedMargin += Math.floor((pos.marginUsed / pos.quantity) * closeQty);
                     fee += this.esm_calculateFee(Math.abs(pnl));
                     pos.quantity -= closeQty;
@@ -1870,7 +1882,7 @@
                     const pos = this.esm_positions[code][direction];
                     if (!pos || pos.quantity <= 0) return;
                     const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
-                    const pnl = basePnl * pos.leverage;
+                    const pnl = basePnl;
                     const lossRatio = pnl < 0 ? -pnl / pos.marginUsed : 0;
                     if (lossRatio >= esm_liquidationThreshold) {
                         this.esm_closePosition(code, pos.quantity, direction);
@@ -1983,7 +1995,7 @@
                         hasPositions = true;
                         const price = this.esm_prices[code];
                         const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
-                        const pnl = basePnl * pos.leverage;
+                        const pnl = basePnl;
                         msg += `${code} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${pos.stopLoss || '无'}, 杠杆${pos.leverage}\n`;
                     }
                 });
@@ -2007,7 +2019,7 @@
                     hasPos = true;
                     const price = this.esm_prices[code];
                     const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
-                    const pnl = basePnl * pos.leverage;
+                    const pnl = basePnl;
                     const estClosePnl = pnl - this.esm_calculateFee(Math.abs(pnl));
                     msg += `${direction}: 开仓时间${pos.openTime}, 已扣费${pos.fundingPaid}, 保证金占用${pos.marginUsed}, 平仓预估盈亏${Math.floor(estClosePnl)}\n`;
                 }
@@ -2247,4 +2259,3 @@
     window.esm_messages = esm_messages;
 
 })();
-
