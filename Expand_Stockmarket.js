@@ -397,7 +397,7 @@
  * @default {"yearVar":"23","monthVar":"24","dayVar":"25","weekVar":"27","periodVar":"28","hourVar":"26"}
 
  * @param stockAccountVar
- * @text 账户余额
+ * @text 资金账户
  * @type variable
  * @default 62
 
@@ -437,7 +437,7 @@
  * @default 68
 
  * @param contractMarginVar
- * @text 保证金账户
+ * @text 合约账户
  * @type variable
  * @default 71
 
@@ -862,7 +862,7 @@
  * @type select
  * @option 无
  * @value none
- * @option 月首周上涨+30%
+ * @option 月首周周上涨+30%
  * @value month_first_up30
  * @option 周末下跌+25%
  * @value week_last_down25
@@ -1091,7 +1091,7 @@
     // 股票列表
     const esm_stockList = [esm_stock1, esm_stock2, esm_stock3, ...esm_customStocks].filter(stock => stock.code && stock.name && stock.basePrice);
     esm_stockList.forEach(stock => {
-        stock.code = stock.code.padStart(3, '0');
+        stock.code = parseInt(stock.code);
         stock.basePrice = Number(stock.basePrice || 100);
         stock.upProb = Number(stock.upProb || 0);
         stock.upAmp = Number(stock.upAmp || esm_maxUpAmp);
@@ -1154,9 +1154,9 @@
                 init[stock.code] = { long: { quantity: 0 }, short: { quantity: 0 } };
             });
             Object.keys(positions).forEach(code => {
-                if (init[code]) {
-                    init[code].long = positions[code].long || { quantity: 0 };
-                    init[code].short = positions[code].short || { quantity: 0 };
+                if (init[Number(code)]) {
+                    init[Number(code)].long = positions[code].long || { quantity: 0 };
+                    init[Number(code)].short = positions[code].short || { quantity: 0 };
                 }
             });
             return init;
@@ -1166,16 +1166,61 @@
             try {
                 this.esm_account = Number($gameVariables.value(esm_stockAccountVar)) || 0;
                 this.esm_holdings = safeJsonParse($gameVariables.value(esm_stockHoldingsVar) || '{}');
+                Object.keys(this.esm_holdings).forEach(key => {
+                    const numKey = Number(key);
+                    if (numKey !== Number(key)) {
+                        this.esm_holdings[numKey] = this.esm_holdings[key];
+                        delete this.esm_holdings[key];
+                    }
+                });
                 this.esm_prices = safeJsonParse($gameVariables.value(esm_stockPricesVar) || '{}');
+                Object.keys(this.esm_prices).forEach(key => {
+                    const numKey = Number(key);
+                    if (numKey !== Number(key)) {
+                        this.esm_prices[numKey] = this.esm_prices[key];
+                        delete this.esm_prices[key];
+                    }
+                });
                 this.esm_avgBuyPrices = safeJsonParse($gameVariables.value(esm_stockAvgBuyPricesVar) || '{}');
+                Object.keys(this.esm_avgBuyPrices).forEach(key => {
+                    const numKey = Number(key);
+                    if (numKey !== Number(key)) {
+                        this.esm_avgBuyPrices[numKey] = this.esm_avgBuyPrices[key];
+                        delete this.esm_avgBuyPrices[key];
+                    }
+                });
                 this.esm_tradeLog = safeJsonParse($gameVariables.value(esm_tradeLogVar) || '[]');
                 this.esm_history = safeJsonParse($gameVariables.value(esm_priceHistoryVar) || '{}');
+                Object.keys(this.esm_history).forEach(key => {
+                    const numKey = Number(key);
+                    if (numKey !== Number(key)) {
+                        this.esm_history[numKey] = this.esm_history[key];
+                        delete this.esm_history[key];
+                    }
+                });
                 this.esm_cumulativeDeposit = Number($gameVariables.value(esm_cumulativeDepositVar)) || 0;
                 this.esm_margin = Number($gameVariables.value(esm_marginVar)) || esm_initialMargin;
                 if (!esm_useSaveObject) {
                     this.esm_positions = safeJsonParse($gameVariables.value(esm_positionsVar) || '{}');
+                    Object.keys(this.esm_positions).forEach(key => {
+                        const numKey = Number(key);
+                        if (numKey !== Number(key)) {
+                            this.esm_positions[numKey] = this.esm_positions[key];
+                            delete this.esm_positions[key];
+                        }
+                    });
                     this.esm_orders = safeJsonParse($gameVariables.value(esm_ordersVar) || '[]');
+                    this.esm_orders.forEach(order => {
+                        order.code = Number(order.code);
+                    });
                     this.esm_ohlcHistory = safeJsonParse($gameVariables.value(esm_ohlcHistoryVar) || '{}');
+                    Object.keys(this.esm_ohlcHistory).forEach(key => {
+                        const numKey = Number(key);
+                        if (numKey !== Number(key)) {
+                            this.esm_ohlcHistory[numKey] = this.esm_ohlcHistory[key];
+                            delete this.esm_ohlcHistory[key];
+                        }
+                    });
                 }
                 this.esm_longFundingRate = Number($gameVariables.value(esm_longFundingRateVar)) || esm_longFundingRateInit;
                 this.esm_shortFundingRate = Number($gameVariables.value(esm_shortFundingRateVar)) || esm_shortFundingRateInit;
@@ -1234,7 +1279,7 @@
 
         esm_getTimeStamp() {
             const time = this.esm_getCurrentTime();
-            return `${time.year}-${time.month.toString().padStart(2, '0')}-${time.day.toString().padStart(2, '0')} 时段${time.period} 小时${time.hour}`;
+            return `${time.year}-${time.month.toString().padStart(2, '0')}-${time.day.toString().padStart(2, '0')}`;
         }
 
         esm_isBusinessHour() {
@@ -1374,13 +1419,13 @@
 
         esm_setSingleMarket(code, prob, upAmp, downAmp, years, months, days) {
             const updates = years * 1440 + months * 120 + days * 4;
-            esm_singleMarketBuffs[code] = { prob: Number(prob), upAmp: Number(upAmp), downAmp: Number(downAmp), remainingUpdates: updates };
+            esm_singleMarketBuffs[Number(code)] = { prob: Number(prob), upAmp: Number(upAmp), downAmp: Number(downAmp), remainingUpdates: updates };
         }
 
         esm_calculateVIP() {
             let totalAssets = this.esm_account;
             Object.keys(this.esm_holdings).forEach(code => {
-                totalAssets += this.esm_holdings[code] * this.esm_prices[code];
+                totalAssets += this.esm_holdings[Number(code)] * this.esm_prices[Number(code)];
             });
             this.esm_vip = 0;
             for (let level = 1; level <= 7; level++) {
@@ -1433,6 +1478,7 @@
         }
 
         esm_buyStock(code, quantity) {
+            code = Number(code);
             if (!this.esm_isBusinessHour()) return $gameMessage.add(esm_messages.closedMessage);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
@@ -1454,6 +1500,7 @@
         }
 
         esm_sellStock(code, quantity) {
+            code = Number(code);
             if (!this.esm_isBusinessHour()) return $gameMessage.add(esm_messages.closedMessage);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
@@ -1478,7 +1525,7 @@
 
         esm_clearAllHoldings() {
             if (!this.esm_isBusinessHour()) return $gameMessage.add(esm_messages.closedMessage);
-            Object.keys(this.esm_holdings).forEach(code => this.esm_sellStock(code, this.esm_holdings[code]));
+            Object.keys(this.esm_holdings).forEach(code => this.esm_sellStock(Number(code), this.esm_holdings[Number(code)]));
         }
 
         esm_queryAllHoldings() {
@@ -1499,7 +1546,7 @@
                     totalValue += curr * hold;
                     totalCost += avg * hold;
                     const pnlStr = pnl > 0 ? '+' + Math.floor(pnl) : Math.floor(pnl);
-                    listMsg += `${stock.displayName}(${code}): ${hold}。收益：${pnlStr}。\n`;
+                    listMsg += `${stock.displayName}(${String(code).padStart(3, '0')}): ${hold}。收益：${pnlStr}。\n`;
                 }
             });
             if (totalTypes === 0) return $gameMessage.add(esm_messages.noHoldings);
@@ -1512,8 +1559,7 @@
         esm_querySingleHolding() {
             const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
-            const code = rawCode.toString().padStart(3, '0');
-            if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
+            const code = Number(rawCode);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.stockNotFound);
             const hold = this.esm_holdings[code] || 0;
@@ -1535,25 +1581,23 @@
                 const monthAgo = hist.find(e => this.esm_daysDiff(currentDayEntry.day, e.day) >= 30);
                 if (monthAgo) monthChange = ((currentAvg - monthAgo.avg) / monthAgo.avg * 100).toFixed(2) + '%';
             }
-            $gameMessage.add(`${stock.displayName}(${code})\n持股数:${hold} 总盈亏:${Math.floor(pnl)}\n成本价:${avg.toFixed(2)}当前价:${curr.toFixed(2)} \n日涨跌:${dayChange} 周涨跌:${weekChange} 月涨跌:${monthChange}`);
+            $gameMessage.add(`${stock.displayName}(${String(code).padStart(3, '0')})\n持股数:${hold} 总盈亏:${Math.floor(pnl)}\n成本价:${avg.toFixed(2)}当前价:${curr.toFixed(2)} \n日涨跌:${dayChange} 周涨跌:${weekChange} 月涨跌:${monthChange}`);
         }
 
         esm_queryStockPrice() {
             const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
-            const code = rawCode.toString().padStart(3, '0');
-            if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
+            const code = Number(rawCode);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.stockNotFound);
-            const price = this.esm_prices[stock.code].toFixed(2);
+            const price = this.esm_prices[code].toFixed(2);
             $gameMessage.add(`${stock.displayName} 当前价格: ${price}元`);
         }
 
         esm_queryCompanyInfo() {
             const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
-            const code = rawCode.toString().padStart(3, '0');
-            if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
+            const code = Number(rawCode);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.stockNotFound);
             let info = stock.companyInfo || '无公司信息。';
@@ -1572,19 +1616,18 @@
                 if (currentLine) wrappedInfo += currentLine + '\n';
             });
             info = wrappedInfo.trim();
-            $gameMessage.add(`${stock.name}(${code})\n${info}`);
+            $gameMessage.add(`${stock.name}(${String(code).padStart(3, '0')})\n${info}`);
         }
 
         esm_queryHistory(numDays) {
             const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
-            const code = rawCode.toString().padStart(3, '0');
-            if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
+            const code = Number(rawCode);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.stockNotFound);
             const hist = this.esm_history[code] || [];
             numDays = Math.min(numDays || esm_historyPeriods, hist.length);
-            let msg = `${stock.displayName}(${code})最近${numDays}交易日历史：\n`;
+            let msg = `${stock.displayName}(${String(code).padStart(3, '0')})最近${numDays}交易日历史：\n`;
             const recentHist = hist.slice(0, numDays);
             recentHist.forEach(entry => {
                 msg += `日期${entry.day}: 开${entry.open.toFixed(2)} 收${entry.close.toFixed(2)} 平均${entry.avg.toFixed(2)}\n`;
@@ -1622,6 +1665,7 @@
         }
 
         esm_openPosition(direction, code, quantity, leverage) {
+            code = Number(code);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
             if (quantity <= 0) return $gameMessage.add(esm_messages.invalidQuantity);
@@ -1648,6 +1692,7 @@
         }
 
         esm_closePosition(code, quantity = 0, direction = '', internal = false) {
+            code = Number(code);
             try {
                 const stock = esm_stockList.find(s => s.code === code);
                 if (!stock) return $gameMessage.add(esm_messages.invalidStockCode);
@@ -1692,13 +1737,13 @@
                     const lossRatio = pnl < 0 ? -pnl / pos.marginUsed : 0;
                     if (lossRatio >= esm_liquidationThreshold) {
                         this.esm_closePosition(code, pos.quantity, direction, true);
-                        $gameMessage.add(esm_messages.liquidationTriggered.replace('%1', code).replace('%2', this.esm_margin));
+                        $gameMessage.add(esm_messages.liquidationTriggered.replace('%1', String(code).padStart(3, '0')).replace('%2', this.esm_margin));
                         if (esm_debugLog) console.log('Expand_Stockmarket: Liquidation triggered for', code, direction);
                     } else if (pos.stopLoss > 0) {
                         const trigger = direction === 'long' ? price <= pos.stopLoss : price >= pos.stopLoss;
                         if (trigger) {
                             this.esm_closePosition(code, pos.quantity, direction, true);
-                            $gameMessage.add(esm_messages.stopLossTriggered.replace('%1', code));
+                            $gameMessage.add(esm_messages.stopLossTriggered.replace('%1', String(code).padStart(3, '0')));
                             if (esm_debugLog) console.log('Expand_Stockmarket: Stop loss triggered for', code, direction);
                         }
                     }
@@ -1712,6 +1757,7 @@
         }
 
         esm_deductFunding(code) {
+            code = Number(code);
             ['long', 'short'].forEach(direction => {
                 const pos = this.esm_positions[code][direction];
                 if (!pos || pos.quantity <= 0) return;
@@ -1728,6 +1774,7 @@
         }
 
         esm_placeOrder(type, direction, code, quantity, price = 0) {
+            code = Number(code);
             if (quantity <= 0) return $gameMessage.add(esm_messages.invalidQuantity);
             if ((type === 'limit' || type === 'takeProfit' || type === 'stopLoss') && price <= 0) return $gameMessage.add(esm_messages.invalidPrice);
             const order = {
@@ -1756,6 +1803,7 @@
         }
 
         esm_executeOrders(code, currentPrice) {
+            code = Number(code);
             this.esm_orders = this.esm_orders.filter(order => {
                 if (order.code !== code || order.status !== 'pending') return true;
                 let execute = false;
@@ -1802,7 +1850,7 @@
                         const price = this.esm_prices[code];
                         const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
                         const pnl = basePnl * pos.leverage;
-                        msg += `${code} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${pos.stopLoss || '无'}, 杠杆${pos.leverage}\n`;
+                        msg += `${String(code).padStart(3, '0')} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${pos.stopLoss || '无'}, 杠杆${pos.leverage}\n`;
                     }
                 });
             });
@@ -1813,11 +1861,10 @@
         esm_querySinglePosition() {
             const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
-            const code = rawCode.toString().padStart(3, '0');
-            if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
+            const code = Number(rawCode);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.stockNotFound);
-            let msg = `${stock.displayName}(${code})\n`;
+            let msg = `${stock.displayName}(${String(code).padStart(3, '0')})\n`;
             let hasPos = false;
             ['long', 'short'].forEach(direction => {
                 const pos = this.esm_positions[code][direction];
@@ -1835,6 +1882,7 @@
         }
 
         esm_setStopLevels(code, direction, takeProfitPrice, stopLossPrice) {
+            code = Number(code);
             try {
                 const pos = this.esm_positions[code][direction];
                 if (!pos || pos.quantity <= 0) return $gameMessage.add('无该持仓！');
@@ -1870,14 +1918,13 @@
         esm_queryContractHistory(numPeriods = 10) {
             const rawCode = $gameVariables.value(esm_inputCodeVar);
             if (isNaN(rawCode)) return $gameMessage.add(esm_messages.invalidStockCode);
-            const code = rawCode.toString().padStart(3, '0');
-            if (code.length !== 3) return $gameMessage.add(esm_messages.invalidStockCode);
+            const code = Number(rawCode);
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return $gameMessage.add(esm_messages.stockNotFound);
             const hist = this.esm_ohlcHistory[code] || [];
             if (hist.length === 0) return $gameMessage.add(esm_messages.noHistory);
             numPeriods = Math.min(numPeriods, hist.length);
-            let msg = `${stock.displayName}(${code})最近${numPeriods}周期OHLC历史：\n`;
+            let msg = `${stock.displayName}(${String(code).padStart(3, '0')})最近${numPeriods}周期OHLC历史：\n`;
             const recentHist = hist.slice(0, numPeriods);
             recentHist.forEach(entry => {
                 msg += `日期${entry.period}: 开${entry.open.toFixed(2)} 高${entry.high.toFixed(2)} 低${entry.low.toFixed(2)} 收${entry.close.toFixed(2)}\n`;
@@ -1904,12 +1951,12 @@
                 case 'WithdrawCash': this.esm_withdrawCash($gameVariables.value(esm_inputAmountVar)); break;
                 case 'BuyStock': 
                     const buyRawCode = $gameVariables.value(esm_inputCodeVar);
-                    const buyCode = buyRawCode.toString().padStart(3, '0');
+                    const buyCode = Number(buyRawCode);
                     this.esm_buyStock(buyCode, $gameVariables.value(esm_inputAmountVar)); 
                     break;
                 case 'SellStock': 
                     const sellRawCode = $gameVariables.value(esm_inputCodeVar);
-                    const sellCode = sellRawCode.toString().padStart(3, '0');
+                    const sellCode = Number(sellRawCode);
                     this.esm_sellStock(sellCode, $gameVariables.value(esm_inputAmountVar)); 
                     break;
                 case 'ClearAllHoldings': this.esm_clearAllHoldings(); break;
@@ -1928,31 +1975,31 @@
                     this.esm_setGlobalMarket(args.prob, args.upAmp, args.downAmp, args.durationYears, args.durationMonths, args.durationDays);
                     break;
                 case 'SingleMarket':
-                    this.esm_setSingleMarket(args.code, args.prob, args.upAmp, args.downAmp, args.durationYears, args.durationMonths, args.durationDays);
+                    this.esm_setSingleMarket(Number(args.code), args.prob, args.upAmp, args.downAmp, args.durationYears, args.durationMonths, args.durationDays);
                     break;
                 // 合约命令
                 case 'DepositMargin': this.esm_depositMargin($gameVariables.value(esm_inputAmountVar)); break;
                 case 'WithdrawMargin': this.esm_withdrawMargin($gameVariables.value(esm_inputAmountVar)); break;
                 case 'OpenLong': 
-                    const longCode = $gameVariables.value(esm_inputCodeVar).toString().padStart(3, '0');
+                    const longCode = Number($gameVariables.value(esm_inputCodeVar));
                     this.esm_openPosition('long', longCode, $gameVariables.value(esm_inputAmountVar), $gameVariables.value(esm_contractInputLeverageVar)); 
                     break;
                 case 'OpenShort': 
-                    const shortCode = $gameVariables.value(esm_inputCodeVar).toString().padStart(3, '0');
+                    const shortCode = Number($gameVariables.value(esm_inputCodeVar));
                     this.esm_openPosition('short', shortCode, $gameVariables.value(esm_inputAmountVar), $gameVariables.value(esm_contractInputLeverageVar)); 
                     break;
                 case 'ClosePosition': 
-                    const closeCode = $gameVariables.value(esm_inputCodeVar).toString().padStart(3, '0');
+                    const closeCode = Number($gameVariables.value(esm_inputCodeVar));
                     this.esm_closePosition(closeCode, $gameVariables.value(esm_inputAmountVar)); 
                     break;
                 case 'QueryPositions': this.esm_queryPositions(); break;
                 case 'QuerySinglePosition': this.esm_querySinglePosition(); break;
                 case 'PlaceOrder': 
-                    this.esm_placeOrder(args.orderType, args.direction, args.code, Number(args.quantity), Number(args.price)); 
+                    this.esm_placeOrder(args.orderType, args.direction, Number(args.code), Number(args.quantity), Number(args.price)); 
                     break;
                 case 'CancelOrder': this.esm_cancelOrder(Number(args.orderId)); break;
                 case 'SetStopLevels':
-                    const tpCode = args.code.padStart(3, '0');
+                    const tpCode = Number(args.code || $gameVariables.value(esm_inputCodeVar));
                     const tpDirection = args.direction;
                     const tpPrice = Number($gameVariables.value(esm_contractInputTakeProfitVar)) || Number(args.takeProfitPrice) || 0;
                     const slPrice = Number($gameVariables.value(esm_contractInputStopLossVar)) || Number(args.stopLossPrice) || 0;
@@ -2083,49 +2130,49 @@
             this.refresh();
         }
 
-		refresh() {
-    this.contents.clear();
-    esm_manager.esm_calculateVIP(); // 确保最新
-    const account = esm_manager.esm_account || 0;
-    const margin = esm_manager.esm_margin || 0;
-    const vip = esm_manager.esm_getCurrentVIP() || 0;
-    const feeRate = esm_manager.esm_getCurrentFeeRate().percent + '%' || '0%';
-    let time = esm_manager.esm_getTimeStamp() || '未知';
+        refresh() {
+            this.contents.clear();
+            esm_manager.esm_calculateVIP(); // 确保最新
+            const account = esm_manager.esm_account || 0;
+            const margin = esm_manager.esm_margin || 0;
+            const vip = esm_manager.esm_getCurrentVIP() || 0;
+            const feeRate = esm_manager.esm_getCurrentFeeRate().percent + '%' || '0%';
+            let time = esm_manager.esm_getTimeStamp() || '未知';
+			
+            // 添加星期显示（变量ID 27: 1=周一 ... 7=周日）
+            const weekValue = $gameVariables.value(27);
+            let weekDay = '未知';
+            switch (weekValue) {
+                case 1: weekDay = '周一'; break;
+                case 2: weekDay = '周二'; break;
+                case 3: weekDay = '周三'; break;
+                case 4: weekDay = '周四'; break;
+                case 5: weekDay = '周五'; break;
+                case 6: weekDay = '周六'; break;
+                case 7: weekDay = '周日'; break;
+            }
     
-    // 添加星期显示（变量ID 27: 1=周一 ... 7=周日）
-    const weekValue = $gameVariables.value(27);
-    let weekDay = '未知';
-    switch (weekValue) {
-        case 1: weekDay = '周一'; break;
-        case 2: weekDay = '周二'; break;
-        case 3: weekDay = '周三'; break;
-        case 4: weekDay = '周四'; break;
-        case 5: weekDay = '周五'; break;
-        case 6: weekDay = '周六'; break;
-        case 7: weekDay = '周日'; break;
+            // 新增：映射时段到文字（假设1=凌晨,2=上午,3=下午,3=下午,4=傍晚，根据你的插件设置调整）
+            const periodValue = $gameVariables.value(esm_periodVar); // esm_periodVar 是时段变量ID，通常为28
+            let periodText = '未知';
+            switch (periodValue) {
+                case 1: periodText = '凌晨'; break;
+                case 2: periodText = '上午'; break;
+                case 3: periodText = '下午'; break;
+                case 4: periodText = '傍晚'; break;
+            }
+    
+            // 修改时间格式：从 esm_getTimeStamp() 获取年月日，并重组
+            const [yearMonthDay] = time.split(' '); // 分割原 time 为 '2001-01-04' 和其余
+            const hour = $gameVariables.value(esm_hourVar); // esm_hourVar 是小时变量ID，通常为26
+            const formattedTime = `${yearMonthDay} ${weekDay} ${periodText} ${hour}时`;
+    
+            this.drawText(`资金账户: ${account} 金币`, 0, 0, this.width - this.padding * 2, 'center');
+            this.drawText(`合约账户: ${margin} 金币`, 0, this.lineHeight(), this.width - this.padding * 2, 'center');
+            this.drawText(`VIP等级: ${vip} 手续费: ${feeRate}`, 0, this.lineHeight() * 2, this.width - this.padding * 2, 'center');
+            this.drawText(`当前时间: ${formattedTime}`, 0, this.lineHeight() * 3, this.width - this.padding * 2, 'center');
+        }
     }
-    
-    // 新增：映射时段到文字（假设1=凌晨,2=上午,3=下午,4=傍晚，根据你的插件设置调整）
-    const periodValue = $gameVariables.value(esm_periodVar); // esm_periodVar 是时段变量ID，通常为28
-    let periodText = '未知';
-    switch (periodValue) {
-        case 1: periodText = '凌晨'; break;
-        case 2: periodText = '上午'; break;
-        case 3: periodText = '下午'; break;
-        case 4: periodText = '傍晚'; break;
-    }
-    
-    // 修改时间格式：从 esm_getTimeStamp() 获取年月日，并重组
-    const [yearMonthDay] = time.split(' '); // 分割原 time 为 '2001-01-04' 和其余
-    const hour = $gameVariables.value(esm_hourVar); // esm_hourVar 是小时变量ID，通常为26
-    const formattedTime = `${yearMonthDay} ${weekDay} ${periodText} ${hour}时`;
-    
-    this.drawText(`账户余额: ${account} 金币`, 0, 0, this.width - this.padding * 2, 'center');
-    this.drawText(`保证金: ${margin} 金币`, 0, this.lineHeight(), this.width - this.padding * 2, 'center');
-    this.drawText(`VIP等级: ${vip} 手续费: ${feeRate}`, 0, this.lineHeight() * 2, this.width - this.padding * 2, 'center');
-    this.drawText(`当前时间: ${formattedTime}`, 0, this.lineHeight() * 3, this.width - this.padding * 2, 'center');
-	}
-			}
 
     // 新窗口类: 股票列表窗口（用于个股查询）
     class Window_StockList extends Window_Selectable {
@@ -2142,7 +2189,7 @@
         drawItem(index) {
             const stock = this._data[index];
             if (!stock) return;
-            const code = stock.code || '未知';
+            const code = stock.code;
             const name = stock.displayName || stock.name || '未知';
             const price = esm_manager.esm_prices[code] || 0;
             const hist = esm_manager.esm_history[code] || [];
@@ -2153,7 +2200,7 @@
                 change = prevAvg > 0 ? ((currAvg - prevAvg) / prevAvg * 100).toFixed(2) + '%' : '0%';
             }
             const rect = this.itemLineRect(index);
-            this.drawText(`${code} ${name} ${price} (${change})`, rect.x, rect.y, rect.width);
+            this.drawText(`${String(code).padStart(3, '0')} ${name} ${price} (${change})`, rect.x, rect.y, rect.width);
         }
 
         currentStock() {
@@ -2374,7 +2421,7 @@
             const stock = this._stockListWindow.currentStock();
             if (!stock) return;
             this._selectedCode = stock.code;
-            $gameVariables.setValue(esm_inputCodeVar, parseInt(stock.code));
+            $gameVariables.setValue(esm_inputCodeVar, stock.code);
             this._stockListWindow.hide();
             this._stockListWindow.deactivate();
             const symbol = this._currentAction;
@@ -2382,7 +2429,6 @@
             let text = '';
             switch (symbol) {
                 case 'singleHolding':
-                    esm_manager.esm_querySingleHolding();
                     text = this.getSingleHoldingText(this._selectedCode);
                     break;
                 case 'stockPrice':
@@ -2423,8 +2469,6 @@
             let text = '';
             switch (type) {
                 case 'allHoldings':
-                    text = esm_manager.esm_queryAllHoldings(); // 用主插件函数，但它用消息框，这里返回文本
-                    // 由于主插件用 $gameMessage.add，需改成返回字符串
                     let listMsg = '';
                     let totalTypes = 0;
                     let totalValue = 0;
@@ -2442,7 +2486,7 @@
                             totalValue += curr * hold;
                             totalCost += avg * hold;
                             const pnlStr = pnl > 0 ? '+' + Math.floor(pnl) : Math.floor(pnl);
-                            listMsg += `${stock.displayName}(${code}): ${hold}。收益：${pnlStr}。\n`;
+                            listMsg += `${stock.displayName}(${String(code).padStart(3, '0')}): ${hold}。收益：${pnlStr}。\n`;
                         }
                     });
                     if (totalTypes === 0) return esm_messages.noHoldings || '您目前没有持有任何股票。';
@@ -2463,7 +2507,7 @@
                                 const price = esm_manager.esm_prices[code];
                                 const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
                                 const pnl = basePnl * pos.leverage;
-                                msg += `${code} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${pos.stopLoss || '无'}, 杠杆${pos.leverage}\n`;
+                                msg += `${String(code).padStart(3, '0')} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${pos.stopLoss || '无'}, 杠杆${pos.leverage}\n`;
                             }
                         });
                     });
@@ -2498,13 +2542,13 @@
                 const monthAgo = hist.find(e => esm_manager.esm_daysDiff(currentDayEntry.day, e.day) >= 30);
                 if (monthAgo) monthChange = ((currentAvg - monthAgo.avg) / monthAgo.avg * 100).toFixed(2) + '%';
             }
-            return `${stock.displayName}(${code})\n持股数:${hold} 总盈亏:${Math.floor(pnl)}\n成本价:${avg.toFixed(2)}当前价:${curr.toFixed(2)} \n日涨跌:${dayChange} 周涨跌:${weekChange} 月涨跌:${monthChange}`;
+            return `${stock.displayName}(${String(code).padStart(3, '0')})\n持股数:${hold} 总盈亏:${Math.floor(pnl)}\n成本价:${avg.toFixed(2)}当前价:${curr.toFixed(2)} \n日涨跌:${dayChange} 周涨跌:${weekChange} 月涨跌:${monthChange}`;
         }
 
         getStockPriceText(code) {
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
-            const price = esm_manager.esm_prices[stock.code].toFixed(2);
+            const price = esm_manager.esm_prices[code].toFixed(2);
             return `${stock.displayName} 当前价格: ${price}元`;
         }
 
@@ -2527,13 +2571,13 @@
                 if (currentLine) wrappedInfo += currentLine + '\n';
             });
             info = wrappedInfo.trim();
-            return `${stock.name}(${code})\n${info}`;
+            return `${stock.name}(${String(code).padStart(3, '0')})\n${info}`;
         }
 
         getSinglePositionText(code) {
             const stock = esm_stockList.find(s => s.code === code);
             if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
-            let msg = `${stock.displayName}(${code})\n`;
+            let msg = `${stock.displayName}(${String(code).padStart(3, '0')})\n`;
             let hasPos = false;
             ['long', 'short'].forEach(direction => {
                 const pos = esm_manager.esm_positions[code][direction];
@@ -2557,7 +2601,7 @@
             const numPeriods = 10;  // 默认10周期，与主插件一致
             if (hist.length === 0) return esm_messages.noHistory || '无合约历史记录。';
             const effectivePeriods = Math.min(numPeriods, hist.length);
-            let text = `${stock.displayName}(${code})最近${effectivePeriods}周期OHLC历史：\n`;
+            let text = `${stock.displayName}(${String(code).padStart(3, '0')})最近${effectivePeriods}周期OHLC历史：\n`;
             const recentHist = hist.slice(0, effectivePeriods);
             recentHist.forEach(entry => {
                 text += `日期${entry.period}: 开${entry.open.toFixed(2)} 高${entry.high.toFixed(2)} 低${entry.low.toFixed(2)} 收${entry.close.toFixed(2)}\n`;
