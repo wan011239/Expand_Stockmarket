@@ -99,8 +99,12 @@
     const parameters = PluginManager.parameters('Expand_Stockmarket_window');
     const esmw_menuCommandName = parameters['menuCommandName'] || '股市';
     const esmw_enableMenuEntry = parameters['enableMenuEntry'] === 'true';
-    const windowSettings = JSON.parse(parameters['windowSettings'] || '{"width":"800","height":"600","offsetX":"0","offsetY":"0"}');
-    const messageSettings = JSON.parse(parameters['messageSettings'] || '{"width":"600","height":"430","offsetX":"200","offsetY":"170"}');
+    const windowSettings = safeJsonParse(parameters['windowSettings'] || '{"width":"800","height":"600","offsetX":"0","offsetY":"0"}');
+    const messageSettings = safeJsonParse(parameters['messageSettings'] || '{"width":"600","height":"430","offsetX":"200","offsetY":"170"}');
+    const queryListSettings = safeJsonParse(parameters['queryListSettings'] || '{"width":"200","height":"430","offsetX":"0","offsetY":"170"}');
+    const stockListSettings = safeJsonParse(parameters['stockListSettings'] || '{"width":"600","height":"430","offsetX":"200","offsetY":"170"}');
+    const infoWindowSettings = safeJsonParse(parameters['infoWindowSettings'] || '{"width":"800","height":"170","offsetX":"0","offsetY":"0"}');
+
     const sceneWidth = Number(windowSettings.width) || 800;
     const sceneHeight = Number(windowSettings.height) || 600;
     const offsetX = Number(windowSettings.offsetX) || 0;
@@ -109,21 +113,14 @@
     const msgHeight = Number(messageSettings.height) || 430;
     const msgOffsetX = Number(messageSettings.offsetX) || 200;
     const msgOffsetY = Number(messageSettings.offsetY) || 170;
-
-    // 新增参数解析
-    const queryListSettings = JSON.parse(parameters['queryListSettings'] || '{"width":"200","height":"430","offsetX":"0","offsetY":"170"}');
     const qlWidth = Number(queryListSettings.width) || 200;
     const qlHeight = Number(queryListSettings.height) || 430;
     const qlOffsetX = Number(queryListSettings.offsetX) || 0;
     const qlOffsetY = Number(queryListSettings.offsetY) || 170;
-
-    const stockListSettings = JSON.parse(parameters['stockListSettings'] || '{"width":"600","height":"430","offsetX":"200","offsetY":"170"}');
     const slWidth = Number(stockListSettings.width) || 600;
     const slHeight = Number(stockListSettings.height) || 430;
     const slOffsetX = Number(stockListSettings.offsetX) || 200;
     const slOffsetY = Number(stockListSettings.offsetY) || 170;
-
-    const infoWindowSettings = JSON.parse(parameters['infoWindowSettings'] || '{"width":"800","height":"170","offsetX":"0","offsetY":"0"}');
     const infoWidth = Number(infoWindowSettings.width) || 800;
     const infoHeight = Number(infoWindowSettings.height) || 170;
     const infoOffsetX = Number(infoWindowSettings.offsetX) || 0;
@@ -134,32 +131,30 @@
     function safeJsonParse(str) {
         try { return JSON.parse(str); } catch (e) { console.error('JSON parse failed:', e); return {}; }
     }
-    let esm_specialEvents = safeJsonParse(stockParams['specialEvents'] || '[]').map(safeJsonParse);
     let esm_variables = safeJsonParse(stockParams['variables'] || '{}');
     let esm_volatility = safeJsonParse(stockParams['volatility'] || '{}');
     let esm_contractSettings = safeJsonParse(stockParams['contractSettings'] || '{}');
     let esm_messages = safeJsonParse(stockParams['messages'] || '{}'); // 额外解析
-    const esm_inputCodeVar = Number(esm_variables.inputCodeVar || 69);
-    const esm_inputAmountVar = Number(esm_variables.inputAmountVar || 68);
-    const esm_contractInputAmountVar = Number(esm_variables.contractInputAmountVar || 73);
-    const esm_contractInputCodeVar = Number(esm_variables.contractInputCodeVar || 74);
+
+    const esm_inputCodeVar = Number(esm_variables.inputCodeVar || 68);
+    const esm_inputAmountVar = Number(esm_variables.inputAmountVar || 69);
     const esm_contractInputLeverageVar = Number(esm_variables.contractInputLeverageVar || 75);
     const esm_contractInputStopLossVar = Number(esm_variables.contractInputStopLossVar || 76);
-    const esm_historyPeriods = Number(esm_volatility.historyPeriods || 30);
+    const esm_contractInputTakeProfitVar = Number(esm_variables.contractInputTakeProfitVar || 77);
+    const esm_contractOrdersVar = Number(esm_variables.contractOrdersVar || 73);
+    const esm_contractHistoryVar = Number(esm_variables.contractHistoryVar || 78);
+    const esm_contractLongFundingRateVar = Number(esm_variables.contractLongFundingRateVar || 79);
+    const esm_contractShortFundingRateVar = Number(esm_variables.contractShortFundingRateVar || 80);
+    const esm_historyPeriods = Number(esm_volatility.historyPeriods || 10);
 
     // 检查依赖
-    if (typeof esm_manager === 'undefined' || typeof esm_stockList === 'undefined') {
-        console.error('Expand_Stockmarket_window: 依赖插件 Expand_Stockmarket 未加载或未初始化必要的变量（如 esm_manager 或 esm_stockList）。');
+    if (typeof esm_manager === 'undefined' || typeof esm_stockList === 'undefined' || typeof esm_messages === 'undefined') {
+        console.error('Expand_Stockmarket_window: 依赖插件 Expand_Stockmarket 未加载或未初始化必要的变量（如 esm_manager, esm_stockList 或 esm_messages）。');
         alert('错误: Expand_Stockmarket 未加载！');
         return;
     }
 
-    if (typeof esm_messages === 'undefined') {
-        console.warn('Expand_Stockmarket_window: esm_messages 未暴露，使用默认消息。');
-        esm_messages = {}; // 默认空，避免崩溃
-    }
-
-    // 新窗口类: 信息显示窗口（保留）
+    // 新窗口类: 信息显示窗口
     class Window_StockInfo extends Window_Base {
         initialize(rect) {
             super.initialize(rect);
@@ -172,11 +167,12 @@
             const account = esm_manager.esm_account || 0;
             const margin = esm_manager.esm_margin || 0;
             const vip = esm_manager.esm_getCurrentVIP() || 0;
-            const feeRate = esm_manager.esm_getCurrentFeeRate().percent + '%' || '0%';
+            const rate = esm_manager.esm_getCurrentFeeRate().rate || 0.005; // fallback防止undefined
+            const feeRate = (rate * 100).toFixed(2) + '%';
             let time = esm_manager.esm_getTimeStamp() || '未知';
-			
+            
             // 添加星期显示（变量ID 27: 1=周一 ... 7=周日）
-            const weekValue = $gameVariables.value(27);
+            const weekValue = $gameVariables.value(27) || 0;
             let weekDay = '未知';
             switch (weekValue) {
                 case 1: weekDay = '周一'; break;
@@ -187,14 +183,22 @@
                 case 6: weekDay = '周六'; break;
                 case 7: weekDay = '周日'; break;
             }
-            this.drawText(`账户余额: ${account} 金币`, 0, 0, this.width - this.padding * 2, 'center');
-            this.drawText(`保证金: ${margin} 金币`, 0, this.lineHeight(), this.width - this.padding * 2, 'center');
+
+            // 修改时间显示：增加小时（变量ID 26）
+            const hour = $gameVariables.value(26) || 0;
+            const timeParts = time.split(' ');
+            const date = timeParts[0] || '未知';
+            const ampm = timeParts[1] || '';
+            const fullTime = `${date} ${hour}点 ${ampm} ${weekDay}`;
+
+            this.drawText(`资金账户: ${account} 金币`, 0, 0, this.width - this.padding * 2, 'center');
+            this.drawText(`合约账户: ${margin} 金币`, 0, this.lineHeight(), this.width - this.padding * 2, 'center');
             this.drawText(`VIP等级: ${vip} 手续费: ${feeRate}`, 0, this.lineHeight() * 2, this.width - this.padding * 2, 'center');
-            this.drawText(`当前时间: ${time} ${weekDay}`, 0, this.lineHeight() * 3, this.width - this.padding * 2, 'center');
+            this.drawText(`当前时间: ${fullTime}`, 0, this.lineHeight() * 3, this.width - this.padding * 2, 'center');
         }
     }
 
-    // 新窗口类: 股票列表窗口（保留，用于个股查询）
+    // 新窗口类: 股票列表窗口（用于个股查询）
     class Window_StockList extends Window_Selectable {
         initialize(rect) {
             super.initialize(rect);
@@ -228,7 +232,7 @@
         }
     }
 
-    // 修改: 操作结果/查询消息窗口（继承 Window_Selectable 以支持交互和滚动）
+    // 操作结果/查询消息窗口（继承 Window_Selectable 以支持交互和滚动）
     class Window_StockMessage extends Window_Selectable {
         initialize(rect) {
             super.initialize(rect);
@@ -255,7 +259,7 @@
 
         wrapText(text) {
             const maxWidth = this.contentsWidth();
-            const buffer = this.textWidth('中中');  // 估算两个中文字符的宽度，作为提前换行的缓冲空间
+            const buffer = this.textWidth('中中');  // 增加缓冲到两个中文字符的宽度，防止溢出
             const lines = text.split('\n');
             const result = [];
             for (let line of lines) {
@@ -308,18 +312,18 @@
         }
     }
 
-    // 修改：使用 Window_SubCommand 作为查询选项固定窗口（原用于子命令，现在用于固定查询列表）
+    // 查询选项固定窗口
     class Window_SubCommand extends Window_Command {
         constructor(rect, commands) {
             super(rect);
-            this._commands = commands || []; // 修复警告：默认空数组
+            this._commands = commands || []; // 默认空数组
             this.refresh();  // 立即刷新
         }
 
         makeCommandList() {
-            if (!this._commands || !Array.isArray(this._commands)) {
-                console.warn('Window_SubCommand: _commands is undefined or not array, using empty array.');
-                this._commands = [];  // 强制默认
+            if (!Array.isArray(this._commands)) {
+                console.warn('Window_SubCommand: _commands is not array, using empty array.');
+                this._commands = [];
             }
             this._commands.forEach(cmd => {
                 if (cmd && cmd.name && cmd.symbol) {
@@ -329,7 +333,7 @@
         }
     }
 
-    // 修改：新场景 Scene_StockmarketWindow（移除左侧主命令窗口，只保留查询相关）
+    // 新场景 Scene_StockmarketWindow
     class Scene_StockmarketWindow extends Scene_MenuBase {
         create() {
             super.create();
@@ -337,15 +341,15 @@
             this.addChild(this._windowContainer);
             this._windowContainer.x = (Graphics.boxWidth - sceneWidth) / 2 + offsetX;
             this._windowContainer.y = (Graphics.boxHeight - sceneHeight) / 2 + offsetY;
-            this.createInfoWindow();  // 保留信息窗口
-            this.createQueryListWindow();  // 新增：固定查询选项窗口，放在信息窗口下面
-            this.createStockListWindow();  // 保留股票列表（用于个股查询）
-            this.createMessageWindow();  // 保留消息窗口（显示查询结果）
+            this.createInfoWindow();  // 信息窗口
+            this.createQueryListWindow();  // 固定查询选项窗口
+            this.createStockListWindow();  // 股票列表（用于个股查询）
+            this.createMessageWindow();  // 消息窗口（显示查询结果）
 
             // 隐藏返回按钮
             if (this._cancelButton) this._cancelButton.visible = false;
 
-            // 修改：场景启动时激活查询列表窗口（固定显示）
+            // 场景启动时激活查询列表窗口
             this._queryListWindow.activate();
         }
 
@@ -353,25 +357,24 @@
             super.createBackground();
         }
 
-        // 修改：信息窗口位置调整到 x=0，全宽
         createInfoWindow() {
             const rect = new Rectangle(infoOffsetX, infoOffsetY, infoWidth, infoHeight);
             this._infoWindow = new Window_StockInfo(rect);
             this._windowContainer.addChild(this._infoWindow);
         }
 
-        // 新增：创建固定查询列表窗口（使用原查询命令，放在信息窗口下面）
         createQueryListWindow() {
             const rect = new Rectangle(qlOffsetX, qlOffsetY, qlWidth, qlHeight);
             const queryCommands = [
-                { name: '股票持仓', symbol: 'allHoldings' },
-                { name: '单独股票', symbol: 'singleHolding' },
-                { name: '股票价格', symbol: 'stockPrice' },
                 { name: '公司信息', symbol: 'companyInfo' },
-                { name: '合约持仓', symbol: 'positions' },
+                { name: '股票价格', symbol: 'stockPrice' },
+                { name: '全股持仓', symbol: 'allHoldings' },
+                { name: '个股持仓', symbol: 'singleHolding' },
+                { name: '历史均价', symbol: 'stockHistory' },  // 新增: 股票历史查询
+                { name: '全部合约', symbol: 'positions' },
                 { name: '单独合约', symbol: 'singlePosition' },
-                { name: '资金费率', symbol: 'fundingRate' },
-                { name: '合约历史', symbol: 'contractHistory' }  // 新增合约历史查询
+                { name: '历史趋势', symbol: 'contractHistory' },  // 新增合约历史查询
+                { name: '资金费率', symbol: 'fundingRate' }
             ];
             this._queryListWindow = new Window_SubCommand(rect, queryCommands);
             this._queryListWindow.setHandler('ok', this.onQuerySub.bind(this));
@@ -379,7 +382,6 @@
             this._windowContainer.addChild(this._queryListWindow);
         }
 
-        // 修改：股票列表窗口位置调整到 x=0（需要时覆盖查询列表）
         createStockListWindow() {
             const rect = new Rectangle(slOffsetX, slOffsetY, slWidth, slHeight);
             this._stockListWindow = new Window_StockList(rect);
@@ -404,7 +406,7 @@
             esm_manager.esm_checkAndUpdatePrices();
             this._infoWindow.refresh();
             this._stockListWindow.refresh();
-            this._queryListWindow.refresh();  // 新增：刷新查询列表
+            this._queryListWindow.refresh();
         }
 
         update() {
@@ -416,56 +418,60 @@
             }
         }
 
-        // 修改：查询子选项处理（现在从固定查询列表调用）
         onQuerySub() {
-            const symbol = this._queryListWindow.currentSymbol();  // 修改：从查询列表获取
+            const symbol = this._queryListWindow.currentSymbol();
             this._currentAction = symbol;
             this._inputValues = {};
             if (symbol === 'allHoldings' || symbol === 'positions' || symbol === 'fundingRate') {
                 const text = this.getQueryText(symbol);
-                this._queryListWindow.deactivate();  // 停用查询列表
+                this._queryListWindow.deactivate();
                 this._messageWindow.setText(text);
                 this._messageWindow.show();
-                this._messageWindow.activate();  // 激活消息窗口
+                this._messageWindow.activate();
                 this._messageWindow.select(0);
             } else {
-                // 需要个股的查询，显示股票列表（包括新增的 'contractHistory'）
-                this._queryListWindow.deactivate();  // 停用查询列表
+                // 需要个股的查询，显示股票列表
+                this._queryListWindow.deactivate();
                 this._stockListWindow.show();
                 this._stockListWindow.activate();
             }
         }
 
-        // 保留：股票选择处理（用于个股查询）
         onStockSelect() {
             const stock = this._stockListWindow.currentStock();
             if (!stock) return;
             this._selectedCode = stock.code;
-            $gameVariables.setValue(esm_contractInputCodeVar, parseInt(stock.code));
-            $gameVariables.setValue(esm_inputCodeVar, parseInt(stock.code));
+            $gameVariables.setValue(esm_inputCodeVar, parseInt(stock.code, 10));
             this._stockListWindow.hide();
             this._stockListWindow.deactivate();
             const symbol = this._currentAction;
 
             let text = '';
-            switch (symbol) {
-                case 'singleHolding':
-                    text = this.getSingleHoldingText(this._selectedCode);
-                    break;
-                case 'stockPrice':
-                    text = this.getStockPriceText(this._selectedCode);
-                    break;
-                case 'companyInfo':
-                    text = this.getCompanyInfoText(this._selectedCode);
-                    break;
-                case 'singlePosition':
-                    text = this.getSinglePositionText(this._selectedCode);
-                    break;
-                case 'contractHistory':  // 新增: 处理合约历史查询
-                    text = this.getContractHistoryText(this._selectedCode);
-                    break;
+            try {
+                switch (symbol) {
+                    case 'singleHolding':
+                        text = this.getSingleHoldingText(this._selectedCode);
+                        break;
+                    case 'stockPrice':
+                        text = this.getStockPriceText(this._selectedCode);
+                        break;
+                    case 'companyInfo':
+                        text = this.getCompanyInfoText(this._selectedCode);
+                        break;
+                    case 'singlePosition':
+                        text = this.getSinglePositionText(this._selectedCode);
+                        break;
+                    case 'contractHistory':
+                        text = this.getContractHistoryText(this._selectedCode);
+                        break;
+                    case 'stockHistory':
+                        text = this.getStockHistoryText(this._selectedCode);
+                        break;
+                }
+            } catch (e) {
+                console.error('Scene_StockmarketWindow: Query failed', e);
+                text = '查询失败: ' + e.message;
             }
-            this._queryListWindow.deactivate();  // 停用查询列表（虽然已停用，但确保）
             this._messageWindow.setText(text);
             this._messageWindow.show();
             this._messageWindow.activate();
@@ -478,195 +484,207 @@
             this._queryListWindow.activate();  // 返回查询列表
         }
 
-        // 新增：消息窗口关闭处理（OK 或取消）
         onMessageClose() {
             this._messageWindow.hide();
             this._messageWindow.deactivate();
             this._queryListWindow.activate();  // 返回查询列表
         }
 
-        // 修改：简化 nextInputStep 和 executeAction，只处理查询相关（历史查询需要天数）
-        nextInputStep() {
-            const symbol = this._currentAction;
-            if (!this._inputValues) this._inputValues = {};
-            this._inputStep = this._inputStep || 0;
-            this._inputStep++;
-            switch (this._inputStep) {
-                default:
-                    this.executeAction();
-            }
-        }
-
-        executeAction() {
-            const symbol = this._currentAction;
-            let text = '';
-            try {
-                // 移除历史查询相关
-            } catch (e) {
-                console.error('Scene_StockmarketWindow: executeAction failed', e);
-                text = '操作失败: ' + e.message;
-            }
-            this._queryListWindow.deactivate();  // 停用查询列表
-            this._messageWindow.setText(text);
-            this._messageWindow.show();
-            this._messageWindow.activate();
-            this._messageWindow.select(0);
-            this._infoWindow.refresh();
-            this._stockListWindow.refresh();
-        }
-
-        // 保留：查询文本获取函数
         getQueryText(type) {
             let text = '';
-            switch (type) {
-                case 'allHoldings':
-                    let listMsg = '';
-                    let totalTypes = 0;
-                    let totalValue = 0;
-                    let totalCost = 0;
-                    let totalPnl = 0;
-                    esm_stockList.forEach(stock => {
-                        const code = stock.code;
-                        const hold = esm_manager.esm_holdings[code] || 0;
-                        if (hold > 0) {
-                            totalTypes++;
-                            const avg = esm_manager.esm_avgBuyPrices[code] || 0;
-                            const curr = esm_manager.esm_prices[code];
-                            const pnl = (curr - avg) * hold;
-                            totalPnl += pnl;
-                            totalValue += curr * hold;
-                            totalCost += avg * hold;
-                            const pnlStr = pnl > 0 ? '+' + Math.floor(pnl) : Math.floor(pnl);
-                            listMsg += `${stock.displayName}(${code}): ${hold}。收益：${pnlStr}。\n`;
-                        }
-                    });
-                    if (totalTypes === 0) return esm_messages.noHoldings || '您目前没有持有任何股票。';
-                    const yieldRateStr = totalCost > 0 ? (totalValue / totalCost - 1) * 100 : 0;
-                    const yieldFormatted = yieldRateStr > 0 ? '+' + yieldRateStr.toFixed(2) + '%' : yieldRateStr < 0 ? yieldRateStr.toFixed(2) + '%' : '0%';
-                    const totalPnlStr = totalPnl > 0 ? '+' + Math.floor(totalPnl) : totalPnl < 0 ? Math.floor(totalPnl) : '0';
-                    text = `持仓数：${totalTypes}。总盈亏：${totalPnlStr}。收益率：${yieldFormatted}\n${listMsg}`;
-                    break;
-                case 'positions':
-                    let msg = '';
-                    let hasPositions = false;
-                    esm_stockList.forEach(stock => {
-                        const code = stock.code;
-                        ['long', 'short'].forEach(direction => {
-                            const pos = esm_manager.esm_positions[code][direction];
-                            if (pos && pos.quantity > 0) {
-                                hasPositions = true;
-                                const price = esm_manager.esm_prices[code];
-                                const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
-                                const pnl = basePnl * pos.leverage;
-                                msg += `${code} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${pos.stopLoss || '无'}, 杠杆${pos.leverage}\n`;
+            try {
+                switch (type) {
+                    case 'allHoldings':
+                        let listMsg = '';
+                        let totalTypes = 0;
+                        let totalValue = 0;
+                        let totalCost = 0;
+                        let totalPnl = 0;
+                        esm_stockList.forEach(stock => {
+                            const code = stock.code;
+                            const hold = esm_manager.esm_holdings[code] || 0;
+                            if (hold > 0) {
+                                totalTypes++;
+                                const avg = esm_manager.esm_avgBuyPrices[code] || 0;
+                                const curr = esm_manager.esm_prices[code] || 0;
+                                const pnl = (curr - avg) * hold;
+                                totalPnl += pnl;
+                                totalValue += curr * hold;
+                                totalCost += avg * hold;
+                                const pnlStr = pnl > 0 ? '+' + Math.floor(pnl) : Math.floor(pnl);
+                                listMsg += `${stock.displayName || stock.name}(${code}): ${hold}。收益：${pnlStr}。\n`;
                             }
                         });
-                    });
-                    text = hasPositions ? msg : esm_messages.noPositions || '无持仓合约。';
-                    break;
-                case 'fundingRate':
-                    text = esm_messages.fundingRateMsg.replace('%1', esm_manager.esm_longFundingRate).replace('%2', esm_manager.esm_shortFundingRate) || '当前做多费率：0.0001，做空费率：0.0001。';
-                    break;
+                        if (totalTypes === 0) return esm_messages.noHoldings || '您目前没有持有任何股票。';
+                        const yieldRateStr = totalCost > 0 ? (totalValue / totalCost - 1) * 100 : 0;
+                        const yieldFormatted = yieldRateStr > 0 ? '+' + yieldRateStr.toFixed(2) + '%' : yieldRateStr < 0 ? yieldRateStr.toFixed(2) + '%' : '0%';
+                        const totalPnlStr = totalPnl > 0 ? '+' + Math.floor(totalPnl) : totalPnl < 0 ? Math.floor(totalPnl) : '0';
+                        text = `持仓数：${totalTypes}。总盈亏：${totalPnlStr}。收益率：${yieldFormatted}\n${listMsg}`;
+                        break;
+                    case 'positions':
+                        let msg = '';
+                        let hasPositions = false;
+                        esm_stockList.forEach(stock => {
+                            const code = stock.code;
+                            ['long', 'short'].forEach(direction => {
+                                const pos = esm_manager.esm_positions[code][direction];
+                                if (pos && pos.quantity > 0) {
+                                    hasPositions = true;
+                                    const price = esm_manager.esm_prices[code] || 0;
+                                    const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
+                                    const pnl = basePnl * pos.leverage;
+                                    let stopLossPrice = '无';
+                                    let takeProfitPrice = '无';
+                                    esm_manager.esm_orders.forEach(order => {
+                                        if (order.code === code && order.direction === direction && order.status === 'pending') {
+                                            if (order.type === 'stopLoss') stopLossPrice = order.price || '无';
+                                            if (order.type === 'takeProfit') takeProfitPrice = order.price || '无';
+                                        }
+                                    });
+                                    msg += `${code} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${stopLossPrice}, 止盈${takeProfitPrice}, 杠杆${pos.leverage}\n`;
+                                }
+                            });
+                        });
+                        text = hasPositions ? msg : esm_messages.noPositions || '无持仓合约。';
+                        break;
+                    case 'fundingRate':
+                        const longRate = esm_manager.esm_longFundingRate || 0;
+                        const shortRate = esm_manager.esm_shortFundingRate || 0;
+                        text = esm_messages.fundingRateMsg.replace('%1', longRate.toFixed(5)).replace('%2', shortRate.toFixed(5)) || '当前做多费率：0.00000。\n当前做空费率：0.00000。';
+                        break;
+                }
+            } catch (e) {
+                console.error('getQueryText failed:', e);
+                text = '查询失败: ' + e.message;
             }
             return text;
         }
 
         getSingleHoldingText(code) {
-            const stock = esm_stockList.find(s => s.code === code);
-            if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
-            const hold = esm_manager.esm_holdings[code] || 0;
-            if (hold === 0) return `${stock.displayName} 无持仓。`;
-            const avg = esm_manager.esm_avgBuyPrices[code] || 0;
-            const curr = esm_manager.esm_prices[code];
-            const pnl = (curr - avg) * hold;
-            const hist = esm_manager.esm_history[code] || [];
-            const currentDayEntry = hist[0];
-            let dayChange = '0%';
-            let weekChange = '0%';
-            let monthChange = '0%';
-            if (currentDayEntry) {
-                const currentAvg = currentDayEntry.avg;
-                const prevDayEntry = hist[1];
-                if (prevDayEntry) dayChange = ((currentAvg - prevDayEntry.avg) / prevDayEntry.avg * 100).toFixed(2) + '%';
-                const weekAgo = hist.find(e => esm_manager.esm_daysDiff(currentDayEntry.day, e.day) >= 7);
-                if (weekAgo) weekChange = ((currentAvg - weekAgo.avg) / weekAgo.avg * 100).toFixed(2) + '%';
-                const monthAgo = hist.find(e => esm_manager.esm_daysDiff(currentDayEntry.day, e.day) >= 30);
-                if (monthAgo) monthChange = ((currentAvg - monthAgo.avg) / monthAgo.avg * 100).toFixed(2) + '%';
+            try {
+                const stock = esm_stockList.find(s => s.code === code);
+                if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
+                const hold = esm_manager.esm_holdings[code] || 0;
+                if (hold === 0) return `${stock.displayName || stock.name} 无持仓。`;
+                const avg = esm_manager.esm_avgBuyPrices[code] || 0;
+                const curr = esm_manager.esm_prices[code] || 0;
+                const pnl = (curr - avg) * hold;
+                const hist = esm_manager.esm_history[code] || [];
+                const currentDayEntry = hist[0];
+                let dayChange = '0%';
+                let weekChange = '0%';
+                let monthChange = '0%';
+                if (currentDayEntry) {
+                    const currentAvg = currentDayEntry.avg || 0;
+                    const prevDayEntry = hist[1];
+                    if (prevDayEntry) dayChange = ((currentAvg - prevDayEntry.avg) / prevDayEntry.avg * 100).toFixed(2) + '%';
+                    const weekAgo = hist.find(e => esm_manager.esm_daysDiff(currentDayEntry.day, e.day) >= 7);
+                    if (weekAgo) weekChange = ((currentAvg - weekAgo.avg) / weekAgo.avg * 100).toFixed(2) + '%';
+                    const monthAgo = hist.find(e => esm_manager.esm_daysDiff(currentDayEntry.day, e.day) >= 30);
+                    if (monthAgo) monthChange = ((currentAvg - monthAgo.avg) / monthAgo.avg * 100).toFixed(2) + '%';
+                }
+                return `${stock.displayName || stock.name}(${code})\n持股数:${hold} 总盈亏:${Math.floor(pnl)}\n成本价:${avg.toFixed(2)}当前价:${curr.toFixed(2)} \n日涨跌:${dayChange} 周涨跌:${weekChange} 月涨跌:${monthChange}`;
+            } catch (e) {
+                console.error('getSingleHoldingText failed:', e);
+                return '查询失败: ' + e.message;
             }
-            return `${stock.displayName}(${code})\n持股数:${hold} 总盈亏:${Math.floor(pnl)}\n成本价:${avg.toFixed(2)}当前价:${curr.toFixed(2)} \n日涨跌:${dayChange} 周涨跌:${weekChange} 月涨跌:${monthChange}`;
         }
 
         getStockPriceText(code) {
-            const stock = esm_stockList.find(s => s.code === code);
-            if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
-            const price = esm_manager.esm_prices[stock.code].toFixed(2);
-            return `${stock.displayName} 当前价格: ${price}元`;
+            try {
+                const stock = esm_stockList.find(s => s.code === code);
+                if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
+                const price = esm_manager.esm_prices[stock.code] || 0;
+                return `${stock.displayName || stock.name} 当前价格: ${price.toFixed(2)}元`;
+            } catch (e) {
+                console.error('getStockPriceText failed:', e);
+                return '查询失败: ' + e.message;
+            }
         }
 
         getCompanyInfoText(code) {
-            const stock = esm_stockList.find(s => s.code === code);
-            if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
-            let info = stock.companyInfo || '无公司信息。';
-            const maxWidth = Number(stock.infoWidth) || 25;
-            const lines = info.split('\n');
-            let wrappedInfo = '';
-            lines.forEach(line => {
-                let currentLine = '';
-                for (let i = 0; i < line.length; i++) {
-                    currentLine += line[i];
-                    if (currentLine.length >= maxWidth && i < line.length - 1) {
-                        wrappedInfo += currentLine + '\n';
-                        currentLine = '';
-                    }
-                }
-                if (currentLine) wrappedInfo += currentLine + '\n';
-            });
-            info = wrappedInfo.trim();
-            return `${stock.name}(${code})\n${info}`;
+            try {
+                const stock = esm_stockList.find(s => s.code === code);
+                if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
+                let info = stock.companyInfo || '无公司信息。';
+                return `${stock.name}(${code})\n${info}`;
+            } catch (e) {
+                console.error('getCompanyInfoText failed:', e);
+                return '查询失败: ' + e.message;
+            }
         }
 
         getSinglePositionText(code) {
-            const stock = esm_stockList.find(s => s.code === code);
-            if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
-            let msg = `${stock.displayName}(${code})\n`;
-            let hasPos = false;
-            ['long', 'short'].forEach(direction => {
-                const pos = esm_manager.esm_positions[code][direction];
-                if (pos && pos.quantity > 0) {
-                    hasPos = true;
-                    const price = esm_manager.esm_prices[code];
-                    const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
-                    const pnl = basePnl * pos.leverage;
-                    const estClosePnl = pnl - esm_manager.esm_calculateFee(Math.abs(pnl));
-                    msg += `${direction}: 开仓时间${pos.openTime}, 已扣费${pos.fundingPaid}, 保证金占用${pos.marginUsed}, 平仓预估盈亏${Math.floor(estClosePnl)}\n`;
-                }
-            });
-            return hasPos ? msg : esm_messages.noPositions || '无持仓合约。';
+            try {
+                const stock = esm_stockList.find(s => s.code === code);
+                if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
+                let msg = `${stock.displayName || stock.name}(${code})\n`;
+                let hasPos = false;
+                ['long', 'short'].forEach(direction => {
+                    const pos = esm_manager.esm_positions[code][direction];
+                    if (pos && pos.quantity > 0) {
+                        hasPos = true;
+                        const price = esm_manager.esm_prices[code] || 0;
+                        const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
+                        const pnl = basePnl * pos.leverage;
+                        const estClosePnl = pnl - esm_manager.esm_calculateFee(Math.abs(pnl));
+                        msg += `${direction}: 开仓时间${pos.openTime}, 已扣费${pos.fundingPaid}, 保证金占用${pos.marginUsed}, 平仓预估盈亏${Math.floor(estClosePnl)}\n`;
+                    }
+                });
+                return hasPos ? msg : esm_messages.noPositions || '无持仓合约。';
+            } catch (e) {
+                console.error('getSinglePositionText failed:', e);
+                return '查询失败: ' + e.message;
+            }
         }
 
-        // 新增：获取合约历史文本（复制主插件逻辑，返回字符串，默认10周期）
         getContractHistoryText(code) {
-            const stock = esm_stockList.find(s => s.code === code);
-            if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
-            const hist = esm_manager.esm_ohlcHistory[code] || [];
-            const numPeriods = 10;  // 默认10周期，与主插件一致
-            if (hist.length === 0) return esm_messages.noHistory || '无合约历史记录。';
-            const effectivePeriods = Math.min(numPeriods, hist.length);
-            let text = `${stock.displayName}(${code})最近${effectivePeriods}周期OHLC历史：\n`;
-            const recentHist = hist.slice(0, effectivePeriods);
-            recentHist.forEach(entry => {
-                text += `日期${entry.period}: 开${entry.open.toFixed(2)} 高${entry.high.toFixed(2)} 低${entry.low.toFixed(2)} 收${entry.close.toFixed(2)}\n`;
-            });
-            return text;
+            try {
+                const stock = esm_stockList.find(s => s.code === code);
+                if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
+                const hist = esm_manager.esm_ohlcHistory[code] || [];
+                const numPeriods = 10;
+                if (hist.length === 0) return esm_messages.noHistory || '无合约历史记录。';
+                const effectivePeriods = Math.min(numPeriods, hist.length);
+                let text = `${stock.displayName || stock.name}(${code})最近${effectivePeriods}周期OHLC历史：\n`;
+                const recentHist = hist.slice(0, effectivePeriods);
+                recentHist.forEach(entry => {
+                    text += `日期${entry.period}: 开${entry.open.toFixed(2)} 高${entry.high.toFixed(2)} 低${entry.low.toFixed(2)} 收${entry.close.toFixed(2)}\n`;
+                });
+                return text;
+            } catch (e) {
+                console.error('getContractHistoryText failed:', e);
+                return '查询失败: ' + e.message;
+            }
+        }
+
+        getStockHistoryText(code) {
+            try {
+                const stock = esm_stockList.find(s => s.code === code);
+                if (!stock) return esm_messages.stockNotFound || '股票代码不存在，查询为空。';
+                const hist = esm_manager.esm_history[code] || [];
+                const numDays = 10;
+                if (hist.length === 0) return esm_messages.noHistory || '无股票历史记录。';
+                const effectiveDays = Math.min(numDays, hist.length);
+                let text = `${stock.displayName || stock.name}(${code})最近${effectiveDays}天历史价格：\n`;
+                const recentHist = hist.slice(0, effectiveDays);
+                recentHist.forEach(entry => {
+                    text += `日期: ${entry.day}, 平均价: ${entry.avg.toFixed(2)}\n`;
+                });
+                return text;
+            } catch (e) {
+                console.error('getStockHistoryText failed:', e);
+                return '查询失败: ' + e.message;
+            }
         }
     }
 
-    // 插件命令: 打开窗口（保留）
+    // 插件命令: 打开窗口
     PluginManager.registerCommand('Expand_Stockmarket_window', 'OpenStockWindow', () => {
         SceneManager.push(Scene_StockmarketWindow);
     });
 
-    // 添加到主菜单（保留，如果启用）
+    // 添加到主菜单（如果启用）
     if (esmw_enableMenuEntry) {
         const _Scene_Menu_createCommandWindow = Scene_Menu.prototype.createCommandWindow;
         Scene_Menu.prototype.createCommandWindow = function() {
