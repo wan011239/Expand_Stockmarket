@@ -28,52 +28,95 @@
  * @param volatility
  * @text 2. 涨跌设置
  * @type struct<VolatilityStruct>
- * @default {"updateCycle":"hour","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","maxUpAmp":"10","maxDownAmp":"10","historyPeriods":"30","stThreshold":"5"}
+ * @default {"updateCycle":"hour","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","maxUpAmp":"10","maxDownAmp":"10","historyPeriods":"10","stThreshold":"5"}
 
  * @param messages
  * @text 3. 文本设置
  * @type struct<MessagesStruct>
- * @default {"closedMessage":"当前时段休市，请在上午或下午再来","insufficientGold":"金币不足！您只有 %1 金币，无法存入 %2。","invalidAmount":"无效金额，请输入正数。","depositSuccess":"存入成功！资金账户余额：%1 金币。","depositExceed":"金币不足，只有 %1，已存入全部。","withdrawInsufficient":"账户余额不足！资金账户只有 %1 金币，无法取出 %2。","withdrawSuccess":"取出成功！玩家金币增加 %1。","withdrawExceed":"余额不足，只有 %1，已取出全部。","buyInsufficient":"账户余额或数量不足！","buySuccess":"购买成功！持有%1：%2股。","sellInsufficient":"持有数量不足！","sellSuccess":"出售成功！账户增加 %1 金币。","noHoldings":"您目前没有持有任何股票。","stockNotFound":"股票代码不存在，查询为空。","invalidStockCode":"无效股票代码！","stPrefix":"ST*","invalidQuantity":"选择正确的数量。","buyFeeInsufficient":"手续费不足！需额外 %1 金币。","buySuccessFee":"手续费：%1 金币。","sellSuccessFee":"（扣手续费 %1）。","feeRateMsg":"当前VIP等级：%1，手续费率：%2 (即%3%)。","marginInsufficient":"保证金不足！","marginTransferSuccess":"转入/转出成功！保证金余额：%1。","marginTransferFee":"手续费：%1。","openPositionSuccess":"开仓成功！方向：%1，数量：%2。","closePositionSuccess":"平仓成功！盈亏：%1。","stopLossTriggered":"止损触发，已自动平仓：%1。","liquidationTriggered":"爆仓强制平仓：%1，剩余保证金：%2。","fundingFeeDeducted":"扣取资金费率：%1。","invalidLeverage":"杠杆超出范围！使用默认值。","invalidPrice":"价格无效！","orderPlaced":"委托单已挂起：%1。","orderExecuted":"委托单执行：%1。","orderCancelled":"委托单取消：%1。","noPositions":"无持仓合约。","fundingRateMsg":"当前做多费率：%1，做空费率：%2。","stopLevelsSet":"止盈止损设置成功：止盈%1，止损%2。","noHistory":"无合约历史记录。","closedTradeMessage":"非营业时间，请开市再试！"}
+ * @default {"closedMessage":"当前时段休市，请在上午或下午再来","insufficientGold":"金币不足！您只有 %1 金币，无法存入 %2。","invalidAmount":"无效金额，请输入正数。","depositSuccess":"存入成功！资金账户余额：%1 金币。","depositExceed":"金币不足，只有 %1，已存入全部。","withdrawInsufficient":"账户余额不足！资金账户只有 %1 金币，无法取出 %2。","withdrawSuccess":"取出成功！玩家金币增加 %1。","withdrawExceed":"余额不足，只有 %1，已取出全部。","buyInsufficient":"账户余额或数量不足！","buySuccess":"购买成功！持有%1：%2股。","sellInsufficient":"持有数量不足！","sellSuccess":"出售成功！账户增加 %1 金币。","noHoldings":"您目前没有持有任何股票。","stockNotFound":"股票代码不存在，查询为空。","invalidStockCode":"无效股票代码！","stPrefix":"ST*","invalidQuantity":"选择正确的数量。","buyFeeInsufficient":"手续费不足！需额外 %1 金币。","buySuccessFee":"手续费：%1 金币。","sellSuccessFee":"（扣手续费 %1）。","feeRateMsg":"当前VIP等级：%1，手续费率：%2 (即%3%)。","marginInsufficient":"保证金不足！","marginTransferSuccess":"转入/转出成功！合约账户余额：%1。","marginTransferFee":"手续费：%1。","openPositionSuccess":"开仓成功！方向：%1，数量：%2。","closePositionSuccess":"平仓成功！盈亏：%1。","stopLossTriggered":"止损触发，已自动平仓：%1。","liquidationTriggered":"爆仓强制平仓：%1，剩余保证金：%2。","fundingFeeDeducted":"扣取资金费率：%1。","invalidLeverage":"杠杆超出范围！使用默认值。","invalidPrice":"价格无效！","orderPlaced":"委托单已挂起：%1。","orderExecuted":"委托单执行：%1。","orderCancelled":"委托单取消：%1。","noPositions":"无持仓合约。","fundingRateMsg":"当前做多费率：%1。\n当前做空费率：%2。","stopLevelsSet":"止盈止损设置成功：止盈%1，止损%2。","noHistory":"无合约历史记录。","closedTradeMessage":"非营业时间，请开市再试！"}
 
  * @param business
  * @text 4. 营业设置
  * @type struct<BusinessStruct>
  * @default {"enableBusinessHours":"true","businessPeriods":"[\"2\",\"3\"]","businessWeeks":"[\"1\",\"2\",\"3\",\"4\",\"5\"]"}
 
- * @param stock1
- * @text 5. 代码001
- * @type struct<StockInfo>
- * @default {"code":"001","name":"正大科技","basePrice":"75","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"","infoWidth":"25"}
- * @desc 固定代码1配置。
-
- * @param stock2
- * @text 6. 代码002
- * @type struct<StockInfo>
- * @default {"code":"002","name":"深红实业","basePrice":"155","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"","infoWidth":"25"}
- * @desc 固定代码2配置。
-
- * @param stock3
- * @text 7. 代码003
- * @type struct<StockInfo>
- * @default {"code":"003","name":"东方制药","basePrice":"440","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"","infoWidth":"25"}
- * @desc 固定代码3配置。
-
- * @param customStocks
- * @text 8. 自定义代码
- * @type struct<StockInfo>[]
- * @default []
- * @desc 添加额外股票。点击+添加新项，初始为空(填写code等)。
-
  * @param tradeSettings
- * @text 9. 交易设置
+ * @text 5. 交易设置
  * @type struct<TradeSettingsStruct>
  * @default {"vipVar":"74","feeRateVar":"70","thresholds":"{\"vip1\":\"500000\",\"vip2\":\"2000000\",\"vip3\":\"5000000\",\"vip4\":\"10000000\",\"vip5\":\"20000000\",\"vip6\":\"50000000\",\"vip7\":\"100000000\"}","feeRates":"{\"vip0\":\"0.005\",\"vip1\":\"0.004\",\"vip2\":\"0.003\",\"vip3\":\"0.001\",\"vip4\":\"0.0008\",\"vip5\":\"0.0005\",\"vip6\":\"0.0003\",\"vip7\":\"0.0001\"}"}
 
  * @param contractSettings
- * @text 10. 合约设置
+ * @text 6. 合约设置
  * @type struct<ContractSettingsStruct>
- * @default {"initialMargin":"0","defaultLeverage":"5","maxLeverage":"10","liquidationThreshold":"1.0","transactionFeeRate":"0.001","longFundingRate":"0.0001","shortFundingRate":"0.0001","useSaveObject":"true","debugLog":"false"}
+ * @default {"initialMargin":"0","defaultLeverage":"5","maxLeverage":"20","liquidationThreshold":"1.0","longFundingRate":"0.0001","shortFundingRate":"0.0001","useSaveObject":"true","debugLog":"false"}
 
+ * @param customStocks
+ * @text 7. 自定义代码
+ * @type struct<StockInfo>[]
+ * @default []
+ * @desc 添加额外股票。点击+添加新项，初始为空(填写code等)。
+
+ * @param stock1
+ * @text 8. 代码001
+ * @type struct<StockInfo>
+ * @default {"code":"001","name":"正大科技","basePrice":"175","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"核心业务为台式机与局域网设备，年研发投入占比 8%。募集资金 1.5 亿元用于生产线扩建，合作客户含地方国企与重点中学，关联交易主要为高校设备采购。","infoWidth":"25"}
+ * @desc 固定代码1配置。
+
+ * @param stock2
+ * @text 9. 代码002
+ * @type struct<StockInfo>
+ * @default {"code":"002","name":"深红实业","basePrice":"155","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营耐高压无缝钢管与机械加工设备，国内石油管线配件市占率超 20%。第一大股东为地方国资，曾参与华北油田管线改造，为子公司提供 3000 万元借款担保。","infoWidth":"25"}
+ * @desc 固定代码2配置。
+
+ * @param stock3
+ * @text 10. 代码003
+ * @type struct<StockInfo>
+ * @default {"code":"003","name":"东方制药","basePrice":"440","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"深耕呼吸药与中药饮片，“东方感冒片” 居 OTC 前列。建有 GMP 认证车间，募集资金 2 亿元用于新药研发，与 1200 余家医院建立供应关系，高管 22 人年薪合计 82 万元。","infoWidth":"25"}
+ * @desc 固定代码3配置。
+ 
+ * @param stock4
+ * @text 11. 代码004
+ * @type struct<StockInfo>
+ * @default {"code":"004","name":"泰瑞机械","basePrice":"240","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营塔吊与混凝土搅拌机。全国设 20 余个售后网点，参与京沪高速建设，募集资金 1.2 亿元用于智能设备改造，前三大客户占营收 35%。","infoWidth":"25"}
+ * @desc 固定代码4配置。
+ 
+ * @param stock5
+ * @text 12. 代码005
+ * @type struct<StockInfo>
+ * @default {"code":"005","name":"绿能光伏","basePrice":"810","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"早期光伏企业，组件转换效率 14%。产品供西部离网电站，获新能源认证，募集资金 8000 万元扩大产能至 150MW，第一大股东为新能源投资基金。","infoWidth":"25"}
+ * @desc 固定代码5配置。
+ 
+ * @param stock6
+ * @text 13. 代码006
+ * @type struct<StockInfo>
+ * @default {"code":"006","name":"德威电子","basePrice":"220","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"专注电阻、电容及半导体封装，月产能 3 亿颗。拥有 30 项专利，客户含家电企业，募集资金 1 亿元用于封装生产线升级，关联交易为电子材料采购。","infoWidth":"25"}
+ * @desc 固定代码6配置。
+ 
+ * @param stock7
+ * @text 14. 代码007
+ * @type struct<StockInfo>
+ * @default {"code":"007","name":"新海高科","basePrice":"1328","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营服务器与存储设备。为 10 余家电信公司建机房，募集资金 1.3 亿元用于数据中心建设，研发投入占比 9%，多家国际资本资本持股。","infoWidth":"25"}
+ * @desc 固定代码7配置。
+ 
+ * @param stock8
+ * @text 15. 代码008
+ * @type struct<StockInfo>
+ * @default {"code":"008","name":"瀚海地产","basePrice":"680","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"开发住宅与商业广场，“瀚海广场” 为县级市核心。土地储备 1200 亩，募集资金 3 亿元用于新项目开发，物业管理服务业主超 2 万户，资产负债率 62%。","infoWidth":"25"}
+ * @desc 固定代码8配置。
+ 
+ * @param stock9
+ * @text 16. 代码009
+ * @type struct<StockInfo>
+ * @default {"code":"009","name":"美邦国际","basePrice":"417","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营机械与化工进出口。香港、新加坡设 3 家分支机构，代理进口精密机床，通过外贸公司物流对接，募集资金 8000 万元用于保税仓扩建。","infoWidth":"25"}
+ * @desc 固定代码9配置。
+ 
+ * @param stock10
+ * @text 17. 代码010
+ * @type struct<StockInfo>
+ * @default {"code":"010","name":"长青保险","basePrice":"156","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"专注健康与养老保险。与 80 余家医院合作，服务 50 万客户，理赔时效 3 个工作日。偿付能力充足率 180%，募集资金 2 亿元用于分支机构扩张。","infoWidth":"25"}
+ * @desc 固定代码10配置。
+
+ 
  * @command DepositCash
  * @text 存入现金
  * @desc 事件中先用“数值输入处理”存入金额到变量69，然后调用(>可用自动存全部)。
@@ -211,6 +254,10 @@
  * @text 平仓
  * @desc 平仓合约。输入代码到68，数量到69(0=全部)。
 
+ * @command CloseAllPositions
+ * @text 全部平仓
+ * @desc 一键平仓所有合约持仓（无参数，直接执行）。
+
  * @command QueryPositions
  * @text 查询全部合约持仓
  * @desc 显示所有合约持仓概览。
@@ -330,6 +377,7 @@
 
  * @help 使用说明：
  * - 需Time_System插件，变量ID匹配。
+ * - 止盈止损设置：开仓成功后，使用条件分歧，脚本：let code = $gameVariables.value(68).toString().padStart(3, '0'); esm_manager.esm_positions[code] && esm_manager.esm_positions[code]['long'] && esm_manager.esm_positions[code]['long'].quantity > 0               value(68)为股票代码
  * - 交易/更新仅营业时；ST: 价格<5加"ST*"前缀，>=5恢复。
  * - 代码列表: 固定3支，自定义点击+号添加空项，填写code/name等；"公司信息"为多行文本框，支持详细描述(输入时用Enter换行，游戏显示智能分行)；"信息设置"自定义每行字符数(默认25)。
  * - 存入/取出: 0或负用无效提示；>可用自动存/取全部，并用自定义消息。
@@ -391,7 +439,7 @@
  * @default 68
 
  * @param contractMarginVar
- * @text 保证金账户
+ * @text 合约账户
  * @type variable
  * @default 71
 
@@ -503,7 +551,7 @@
  * @type number
  * @min 1
  * @max 100
- * @default 30
+ * @default 10
 
  * @param stThreshold
  * @text ST阈值(元)
@@ -627,7 +675,7 @@
  * @param marginTransferSuccess
  * @text 转入/转出成功
  * @type string
- * @default 转入/转出成功！保证金余额：%1。
+ * @default 转入/转出成功！合约账户余额：%1。
 
  * @param marginTransferFee
  * @text 转账手续费
@@ -853,7 +901,7 @@
 
 /*~struct~ContractSettingsStruct:
  * @param initialMargin
- * @text 初始保证金
+ * @text 初始合约账户
  * @type number
  * @default 0
 
@@ -865,27 +913,36 @@
  * @param maxLeverage
  * @text 最大杠杆
  * @type number
- * @default 10
+ * @default 20
 
  * @param liquidationThreshold
  * @text 爆仓阈值
  * @type number
  * @default 1.0
 
- * @param transactionFeeRate
- * @text 交易手续费率
- * @type number
- * @default 0.001
-
- * @param longFundingRate
- * @text 长仓费率
+ * @param longFundingMin
+ * @text 多方费率下限
  * @type number
  * @default 0.0001
+ * @desc 多方费率随机下限（小数，如0.0001）。
 
- * @param shortFundingRate
- * @text 短仓费率
+ * @param longFundingMax
+ * @text 多方费率上限
+ * @type number
+ * @default 0.0005
+ * @desc 多方费率随机上限（小数，如0.0005）。
+
+ * @param shortFundingMin
+ * @text 空方费率下限
  * @type number
  * @default 0.0001
+ * @desc 空方费率随机下限（小数，如0.0001）。
+
+ * @param shortFundingMax
+ * @text 空方费率上限
+ * @type number
+ * @default 0.0005
+ * @desc 空方费率随机上限（小数，如0.0005）。
 
  * @param useSaveObject
  * @text 使用存档对象
@@ -993,6 +1050,13 @@
     let esm_stock1 = safeJsonParse(parameters['stock1'] || '{}');
     let esm_stock2 = safeJsonParse(parameters['stock2'] || '{}');
     let esm_stock3 = safeJsonParse(parameters['stock3'] || '{}');
+    let esm_stock4 = safeJsonParse(parameters['stock4'] || '{}');
+    let esm_stock5 = safeJsonParse(parameters['stock5'] || '{}');	
+    let esm_stock6 = safeJsonParse(parameters['stock6'] || '{}');
+    let esm_stock7 = safeJsonParse(parameters['stock7'] || '{}');
+    let esm_stock8 = safeJsonParse(parameters['stock8'] || '{}');
+    let esm_stock9 = safeJsonParse(parameters['stock9'] || '{}');
+    let esm_stock10 = safeJsonParse(parameters['stock10'] || '{}');
     let esm_customStocks = (JSON.parse(parameters['customStocks'] || '[]') || []).map(safeJsonParse);
     let esm_tradeSettings = safeJsonParse(parameters['tradeSettings'] || '{}');
     let esm_contractSettings = safeJsonParse(parameters['contractSettings'] || '{}');
@@ -1048,14 +1112,13 @@
     const esm_globalUpProb = Number(esm_volatility.globalUpProb || 50);
     const esm_maxUpAmp = Number(esm_volatility.maxUpAmp || 50);
     const esm_maxDownAmp = Number(esm_volatility.maxDownAmp || 50);
-    const esm_historyPeriods = Number(esm_volatility.historyPeriods || 30);
+    const esm_historyPeriods = Number(esm_volatility.historyPeriods || 10);
     const esm_stThreshold = Number(esm_volatility.stThreshold || 5);
     const esm_useSaveObject = esm_contractSettings.useSaveObject === 'true';
     const esm_debugLog = esm_contractSettings.debugLog === 'true';
     const esm_defaultLeverage = Number(esm_contractSettings.defaultLeverage || 5);
-    const esm_maxLeverage = Number(esm_contractSettings.maxLeverage || 10);
+    const esm_maxLeverage = Number(esm_contractSettings.maxLeverage || 20);
     const esm_liquidationThreshold = Number(esm_contractSettings.liquidationThreshold || 1.0);
-    const esm_transactionFeeRate = Number(esm_contractSettings.transactionFeeRate || 0.001);
     let esm_longFundingRate = Number(esm_contractSettings.longFundingRate || 0.0001);
     let esm_shortFundingRate = Number(esm_contractSettings.shortFundingRate || 0.0001);
 
@@ -1071,7 +1134,7 @@
     const esm_DAYS_PER_YEAR = 365;
 
     // 组合股票列表
-    const esm_stockList = [esm_stock1, esm_stock2, esm_stock3, ...esm_customStocks].filter(stock => stock && stock.code);
+    const esm_stockList = [esm_stock1, esm_stock2, esm_stock3,esm_stock4,esm_stock5,esm_stock6,esm_stock7,esm_stock8,esm_stock9,esm_stock10, ...esm_customStocks].filter(stock => stock && stock.code);
 
     // 防御性: 安全的setValue包装
     function esm_safeSetValue(variableId, value) {
@@ -1215,8 +1278,8 @@
                 this.esm_calculateVIP();
                 // 合约加载
                 this.esm_margin = $gameVariables.value(esm_contractMarginVar) || Number(esm_contractSettings.initialMargin) || 0;
-                this.esm_longFundingRate = $gameVariables.value(esm_contractLongFundingRateVar) || esm_longFundingRate;
-                this.esm_shortFundingRate = $gameVariables.value(esm_contractShortFundingRateVar) || esm_shortFundingRate;
+                this.esm_longFundingRate = Number((Math.random() * (0.0005 - 0.0001) + 0.0001).toFixed(5));
+                this.esm_shortFundingRate = Number((Math.random() * (0.0005 - 0.0001) + 0.0001).toFixed(5));
                 if (esm_useSaveObject) {
                     // 从存档对象加载 (需在DataManager扩展)
                 } else {
@@ -1486,9 +1549,9 @@
         }
 
         esm_setFundingRate(longRate, shortRate) {
-            this.esm_longFundingRate = Number(longRate) || this.esm_longFundingRate;
-            this.esm_shortFundingRate = Number(shortRate) || this.esm_shortFundingRate;
-            this.esm_save();
+            this.esm_longFundingRate = Number((Math.random() * (0.0005 - 0.0001) + 0.0001).toFixed(5));
+            this.esm_shortFundingRate = Number((Math.random() * (0.0005 - 0.0001) + 0.0001).toFixed(5));
+            // this.esm_save();
             if (esm_debugLog) console.log('Expand_Stockmarket: Funding rates set to', this.esm_longFundingRate, this.esm_shortFundingRate);
         }
 
@@ -1765,28 +1828,24 @@
         }
 
         // 合约功能
-        esm_depositMargin(amount) {
-            if (isNaN(amount) || amount <= 0) return $gameMessage.add(esm_messages.invalidAmount);
-            if (amount > this.esm_account) return $gameMessage.add(esm_messages.marginInsufficient);
-            const fee = this.esm_calculateFee(amount);
-            this.esm_account -= amount;
-            this.esm_margin += (amount - fee);
-            this.esm_addLog(`转入保证金 ${amount} (手续费${fee})`);
-            this.esm_save();
-            $gameMessage.add(esm_messages.marginTransferSuccess.replace('%1', this.esm_margin) + esm_messages.marginTransferFee.replace('%1', fee));
-        }
-
-        esm_withdrawMargin(amount) {
-            if (isNaN(amount) || amount <= 0) return $gameMessage.add(esm_messages.invalidAmount);
-            if (amount > this.esm_margin) return $gameMessage.add(esm_messages.marginInsufficient);
-            const fee = this.esm_calculateFee(amount);
-            this.esm_margin -= amount;
-            this.esm_account += (amount - fee);
-            this.esm_addLog(`转出保证金 ${amount} (手续费${fee})`);
-            this.esm_save();
-            $gameMessage.add(esm_messages.marginTransferSuccess.replace('%1', this.esm_margin) + esm_messages.marginTransferFee.replace('%1', fee));
-        }
-
+		esm_depositMargin(amount) {
+		if (isNaN(amount) || amount <= 0) return $gameMessage.add(esm_messages.invalidAmount);
+		if (amount > this.esm_account) return $gameMessage.add(esm_messages.marginInsufficient);
+		this.esm_account -= amount;
+		this.esm_margin += amount;
+		this.esm_addLog(`转入保证金 ${amount}`);
+		this.esm_save();
+		$gameMessage.add(esm_messages.marginTransferSuccess.replace('%1', this.esm_margin));
+		}
+		esm_withdrawMargin(amount) {
+		if (isNaN(amount) || amount <= 0) return $gameMessage.add(esm_messages.invalidAmount);
+		if (amount > this.esm_margin) return $gameMessage.add(esm_messages.marginInsufficient);
+		this.esm_margin -= amount;
+		this.esm_account += amount;
+		this.esm_addLog(`转出保证金 ${amount}`);
+		this.esm_save();
+		$gameMessage.add(esm_messages.marginTransferSuccess.replace('%1', this.esm_margin));
+		}
         esm_openPosition(direction, code, quantity, leverage) {
             if (!this.esm_isBusinessTime()) return $gameMessage.add(esm_messages.closedTradeMessage);
             try {
@@ -1982,25 +2041,34 @@
             });
         }
 
-        esm_queryPositions() {
-            let msg = '';
-            let hasPositions = false;
-            esm_stockList.forEach(stock => {
-                const code = stock.code;
-                ['long', 'short'].forEach(direction => {
-                    const pos = this.esm_positions[code][direction];
-                    if (pos && pos.quantity > 0) {
-                        hasPositions = true;
-                        const price = this.esm_prices[code];
-                        const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
-                        const pnl = basePnl;
-                        msg += `${code} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${pos.stopLoss || '无'}, 杠杆${pos.leverage}\n`;
+		esm_queryPositions() {
+				let msg = '';
+				let hasPositions = false;
+				esm_stockList.forEach(stock => {
+				const code = stock.code;
+				['long', 'short'].forEach(direction => {
+				const pos = this.esm_positions[code][direction];
+				if (pos && pos.quantity > 0) {
+                hasPositions = true;
+                const price = this.esm_prices[code];
+                const basePnl = (price - pos.entryPrice) * pos.quantity * (direction === 'long' ? 1 : -1);
+                const pnl = basePnl * pos.leverage;
+                // 新增：查找止盈/止损委托价
+                let stopLossPrice = '无';
+                let takeProfitPrice = '无';
+                this.esm_orders.forEach(order => {
+                    if (order.code === code && order.direction === direction && order.status === 'pending') {
+                        if (order.type === 'stopLoss') stopLossPrice = order.price;
+                        if (order.type === 'takeProfit') takeProfitPrice = order.price;
                     }
                 });
-            });
-            if (!hasPositions) return $gameMessage.add(esm_messages.noPositions);
-            $gameMessage.add(msg);
-        }
+                msg += `${code} ${direction}: 数量${pos.quantity}, 入场${pos.entryPrice.toFixed(2)}, 当前${price.toFixed(2)}, 盈亏${Math.floor(pnl)}, 止损${stopLossPrice}, 止盈${takeProfitPrice}, 杠杆${pos.leverage}\n`;
+				}
+			});
+		});
+				if (!hasPositions) return $gameMessage.add(esm_messages.noPositions);
+    $gameMessage.add(msg);
+		}
 
         esm_querySinglePosition() {
             const rawCode = $gameVariables.value(esm_inputCodeVar);
@@ -2076,6 +2144,39 @@
             });
             $gameMessage.add(msg);
         }
+		
+			esm_closeAllPositions() {
+				try {
+				let totalPnl = 0;  // 总盈亏
+				let pnlMsg = '';   // 每个代码盈亏消息
+				let hasPositions = false;  // 是否有持仓
+			esm_stockList.forEach(stock => {
+				const code = stock.code;
+					['long', 'short'].forEach(direction => {
+                const pos = this.esm_positions[code][direction];
+					if (pos && pos.quantity > 0) {
+                    hasPositions = true;
+                    const pnl = this.esm_closePosition(code, pos.quantity, direction, true);  // 平仓并捕获盈亏
+                    if (pnl !== null) {  // 成功平仓
+                        totalPnl += pnl;
+                        const pnlStr = pnl > 0 ? '+' + Math.floor(pnl) : Math.floor(pnl);
+                        pnlMsg += `${code} ${direction}: 盈亏 ${pnlStr}\n`;
+                    }
+                }
+            });
+        });
+				this.esm_save();
+				if (hasPositions) {
+				const totalPnlStr = totalPnl > 0 ? '+' + Math.floor(totalPnl) : Math.floor(totalPnl);
+				$gameMessage.add(`所有合约已平仓！\n平仓详情：\n${pnlMsg}总盈亏: ${totalPnlStr}`);
+				} else {
+				$gameMessage.add('无合约可平仓！');
+			}
+			} catch (e) {
+				console.error('Expand_Stockmarket: closeAllPositions failed', e);
+			$gameMessage.add('全部平仓失败！');
+			}
+	}
 
         esm_execCommand(cmd, args) {
             switch (cmd) {
@@ -2097,6 +2198,9 @@
                 case 'QueryStockPrice': this.esm_queryStockPrice(); break;
                 case 'QueryCompanyInfo': this.esm_queryCompanyInfo(); break;
                 case 'QueryHistory': this.esm_queryHistory($gameVariables.value(esm_inputAmountVar)); break;
+				case 'CloseAllPositions':
+    				this.esm_closeAllPositions();
+    				break;
                 case 'QueryFeeRate':
                     const output = Number(args.outputVar || 0);
                     this.esm_queryFeeRate(output);
@@ -2177,6 +2281,7 @@
     PluginManager.registerCommand('Expand_Stockmarket', 'OpenLong', () => esm_manager.esm_execCommand('OpenLong'));
     PluginManager.registerCommand('Expand_Stockmarket', 'OpenShort', () => esm_manager.esm_execCommand('OpenShort'));
     PluginManager.registerCommand('Expand_Stockmarket', 'ClosePosition', () => esm_manager.esm_execCommand('ClosePosition'));
+	PluginManager.registerCommand('Expand_Stockmarket', 'CloseAllPositions', () => esm_manager.esm_execCommand('CloseAllPositions'));
     PluginManager.registerCommand('Expand_Stockmarket', 'QueryPositions', () => esm_manager.esm_execCommand('QueryPositions'));
     PluginManager.registerCommand('Expand_Stockmarket', 'QuerySinglePosition', () => esm_manager.esm_execCommand('QuerySinglePosition'));
     PluginManager.registerCommand('Expand_Stockmarket', 'PlaceOrder', args => esm_manager.esm_execCommand('PlaceOrder', args));
