@@ -224,7 +224,7 @@
                 change = prevAvg > 0 ? ((currAvg - prevAvg) / prevAvg * 100).toFixed(2) + '%' : '0%';
             }
             const rect = this.itemLineRect(index);
-            this.drawText(`${code} ${name} ${price} (${change})`, rect.x, rect.y, rect.width);
+            this.drawText(`${code} ${name} ${Math.floor(price)} (${change})`, rect.x, rect.y, rect.width);
         }
 
         currentStock() {
