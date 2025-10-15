@@ -539,18 +539,6 @@
  * @option 每个小时
  * @value hour
  * @default hour
-
- * @param updateTrigger
- * @text 更新触发
- * @type select
- * @option 自动
- * @value auto
- * @option 手动
- * @value manual
- * @option 两者
- * @value both
- * @default both
-
  * @param crossCycleRule
  * @text 跨周期规则
  * @type select
@@ -1155,7 +1143,7 @@
 
     // 其他
     const esm_updateCycle = esm_volatility.updateCycle || 'hour';
-    const esm_updateTrigger = esm_volatility.updateTrigger || 'both';
+    const esm_updateTrigger = 'manual';
     const esm_crossCycleRule = esm_volatility.crossCycleRule || 'sequential';
     const esm_enableBusinessHours = esm_business.enableBusinessHours === 'true';
     const esm_businessPeriods = JSON.parse(esm_business.businessPeriods || '["2","3"]') .map(Number);
@@ -2399,7 +2387,7 @@
     const _Scene_Map_start = Scene_Map.prototype.start;
     Scene_Map.prototype.start = function() {
         _Scene_Map_start.call(this);
-        if (esm_updateTrigger === 'auto' || esm_updateTrigger === 'both') {
+        if (false) {
             esm_manager.esm_checkAndUpdatePrices();
             esm_manager.esm_checkAndUpdateFundingRates();  // 添加资金费率检查
         }
@@ -2408,7 +2396,7 @@
     const _Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function() {
         _Scene_Map_update.call(this);
-        if (esm_updateTrigger === 'auto' || esm_updateTrigger === 'both') {
+        if (false) {
             esm_manager.esm_checkAndUpdatePrices();
             esm_manager.esm_checkAndUpdateFundingRates();  // 添加资金费率检查
         }
