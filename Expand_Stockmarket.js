@@ -28,7 +28,7 @@
  * @param volatility
  * @text 2. 涨跌设置
  * @type struct<VolatilityStruct>
- * @default {"updateCycle":"hour","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","maxUpAmp":"10","maxDownAmp":"10","historyPeriods":"10","stThreshold":"5"}
+ * @default {"updateCycle":"hour","updateTrigger":"both","crossCycleRule":"sequential","globalUpProb":"50","":"1","maxDownAmp":"1","historyPeriods":"10","stThreshold":"5"}
 
  * @param messages
  * @text 3. 文本设置
@@ -39,7 +39,7 @@
  * @text 4. 营业设置
  * @type struct<BusinessStruct>
  * @default {"enableBusinessHours":"true","businessPeriods":"[\"2\",\"3\"]","businessWeeks":"[\"1\",\"2\",\"3\",\"4\",\"5\"]"}
-
+ 
  * @param tradeSettings
  * @text 5. 交易设置
  * @type struct<TradeSettingsStruct>
@@ -59,61 +59,61 @@
  * @param stock1
  * @text 8. 代码001
  * @type struct<StockInfo>
- * @default {"code":"001","name":"正大科技","basePrice":"175","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"核心业务为台式机与局域网设备，年研发投入占比 8%。募集资金 1.5 亿元用于生产线扩建，合作客户含地方国企与重点中学，关联交易主要为高校设备采购。","infoWidth":"25"}
+ * @default {"code":"001","name":"正大科技","basePrice":"175","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"核心业务为台式机与局域网设备，年研发投入占比 8%。募集资金 1.5 亿元用于生产线扩建，合作客户含地方国企与重点中学，关联交易主要为高校设备采购。","infoWidth":"25"}
  * @desc 固定代码1配置。
 
  * @param stock2
  * @text 9. 代码002
  * @type struct<StockInfo>
- * @default {"code":"002","name":"深红实业","basePrice":"155","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营耐高压无缝钢管与机械加工设备，国内石油管线配件市占率超 20%。第一大股东为地方国资，曾参与华北油田管线改造，为子公司提供 3000 万元借款担保。","infoWidth":"25"}
+ * @default {"code":"002","name":"深红实业","basePrice":"155","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"主营耐高压无缝钢管与机械加工设备，国内石油管线配件市占率超 20%。第一大股东为地方国资，曾参与华北油田管线改造，为子公司提供 3000 万元借款担保。","infoWidth":"25"}
  * @desc 固定代码2配置。
 
  * @param stock3
  * @text 10. 代码003
  * @type struct<StockInfo>
- * @default {"code":"003","name":"东方制药","basePrice":"440","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"深耕呼吸药与中药饮片，“东方感冒片” 居 OTC 前列。建有 GMP 认证车间，募集资金 2 亿元用于新药研发，与 1200 余家医院建立供应关系，高管 22 人年薪合计 82 万元。","infoWidth":"25"}
+ * @default {"code":"003","name":"东方制药","basePrice":"440","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"深耕呼吸药与中药饮片，“东方感冒片” 居 OTC 前列。建有 GMP 认证车间，募集资金 2 亿元用于新药研发，与 1200 余家医院建立供应关系，高管 22 人年薪合计 82 万元。","infoWidth":"25"}
  * @desc 固定代码3配置。
  
  * @param stock4
  * @text 11. 代码004
  * @type struct<StockInfo>
- * @default {"code":"004","name":"泰瑞机械","basePrice":"240","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营塔吊与混凝土搅拌机。全国设 20 余个售后网点，参与京沪高速建设，募集资金 1.2 亿元用于智能设备改造，前三大客户占营收 35%。","infoWidth":"25"}
+ * @default {"code":"004","name":"泰瑞机械","basePrice":"240","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"主营塔吊与混凝土搅拌机。全国设 20 余个售后网点，参与京沪高速建设，募集资金 1.2 亿元用于智能设备改造，前三大客户占营收 35%。","infoWidth":"25"}
  * @desc 固定代码4配置。
  
  * @param stock5
  * @text 12. 代码005
  * @type struct<StockInfo>
- * @default {"code":"005","name":"绿能光伏","basePrice":"810","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"早期光伏企业，组件转换效率 14%。产品供西部离网电站，获新能源认证，募集资金 8000 万元扩大产能至 150MW，第一大股东为新能源投资基金。","infoWidth":"25"}
+ * @default {"code":"005","name":"绿能光伏","basePrice":"810","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"早期光伏企业，组件转换效率 14%。产品供西部离网电站，获新能源认证，募集资金 8000 万元扩大产能至 150MW，第一大股东为新能源投资基金。","infoWidth":"25"}
  * @desc 固定代码5配置。
  
  * @param stock6
  * @text 13. 代码006
  * @type struct<StockInfo>
- * @default {"code":"006","name":"德威电子","basePrice":"220","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"专注电阻、电容及半导体封装，月产能 3 亿颗。拥有 30 项专利，客户含家电企业，募集资金 1 亿元用于封装生产线升级，关联交易为电子材料采购。","infoWidth":"25"}
+ * @default {"code":"006","name":"德威电子","basePrice":"220","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"专注电阻、电容及半导体封装，月产能 3 亿颗。拥有 30 项专利，客户含家电企业，募集资金 1 亿元用于封装生产线升级，关联交易为电子材料采购。","infoWidth":"25"}
  * @desc 固定代码6配置。
  
  * @param stock7
  * @text 14. 代码007
  * @type struct<StockInfo>
- * @default {"code":"007","name":"新海高科","basePrice":"1328","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营服务器与存储设备。为 10 余家电信公司建机房，募集资金 1.3 亿元用于数据中心建设，研发投入占比 9%，多家国际资本资本持股。","infoWidth":"25"}
+ * @default {"code":"007","name":"新海高科","basePrice":"1328","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"主营服务器与存储设备。为 10 余家电信公司建机房，募集资金 1.3 亿元用于数据中心建设，研发投入占比 9%，多家国际资本资本持股。","infoWidth":"25"}
  * @desc 固定代码7配置。
  
  * @param stock8
  * @text 15. 代码008
  * @type struct<StockInfo>
- * @default {"code":"008","name":"瀚海地产","basePrice":"680","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"开发住宅与商业广场，“瀚海广场” 为县级市核心。土地储备 1200 亩，募集资金 3 亿元用于新项目开发，物业管理服务业主超 2 万户，资产负债率 62%。","infoWidth":"25"}
+ * @default {"code":"008","name":"瀚海地产","basePrice":"680","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"开发住宅与商业广场，“瀚海广场” 为县级市核心。土地储备 1200 亩，募集资金 3 亿元用于新项目开发，物业管理服务业主超 2 万户，资产负债率 62%。","infoWidth":"25"}
  * @desc 固定代码8配置。
  
  * @param stock9
  * @text 16. 代码009
  * @type struct<StockInfo>
- * @default {"code":"009","name":"美邦国际","basePrice":"417","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"主营机械与化工进出口。香港、新加坡设 3 家分支机构，代理进口精密机床，通过外贸公司物流对接，募集资金 8000 万元用于保税仓扩建。","infoWidth":"25"}
+ * @default {"code":"009","name":"美邦国际","basePrice":"417","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"主营机械与化工进出口。香港、新加坡设 3 家分支机构，代理进口精密机床，通过外贸公司物流对接，募集资金 8000 万元用于保税仓扩建。","infoWidth":"25"}
  * @desc 固定代码9配置。
  
  * @param stock10
  * @text 17. 代码010
  * @type struct<StockInfo>
- * @default {"code":"010","name":"长青保险","basePrice":"156","upProb":"0","upAmp":"10","downAmp":"10","periodBias":"none","cycleBias":"none","companyInfo":"专注健康与养老保险。与 80 余家医院合作，服务 50 万客户，理赔时效 3 个工作日。偿付能力充足率 180%，募集资金 2 亿元用于分支机构扩张。","infoWidth":"25"}
+ * @default {"code":"010","name":"长青保险","basePrice":"156","upProb":"0","upAmp":"2","downAmp":"2","periodBias":"none","cycleBias":"none","companyInfo":"专注健康与养老保险。与 80 余家医院合作，服务 50 万客户，理赔时效 3 个工作日。偿付能力充足率 180%，募集资金 2 亿元用于分支机构扩张。","infoWidth":"25"}
  * @desc 固定代码10配置。
 
  
@@ -509,12 +509,12 @@
  * @default 85
 
  * @param contractShortFundingRateMinVar
- * @text 做空资金费率下限
+ * @text 做空费率下限
  * @type variable
  * @default 86
 
  * @param contractShortFundingRateMaxVar
- * @text 做空资金费率上限
+ * @text 做空费率上限
  * @type variable
  * @default 87
 
@@ -572,14 +572,14 @@
  * @type number
  * @min 1
  * @max 100
- * @default 10
+ * @default 1
 
  * @param maxDownAmp
  * @text 最大跌幅(%)
  * @type number
  * @min 1
  * @max 100
- * @default 10
+ * @default 1
 
  * @param historyPeriods
  * @text 历史保留(天)
@@ -1424,33 +1424,128 @@
                     const totalCurrent = current.day * esm_PERIODS_PER_DAY + current.period;
                     delta = totalCurrent - totalLast;
                     break;
-                case 'day': delta = current.day - last.day; break;
-                case 'week': delta = current.week - last.week; break;
-                case 'month': delta = current.month - last.month; break;
-                case 'hour': delta = current.hour - last.hour; break;
+                case 'day':
+                    const totalDaysLast = last.year * esm_DAYS_PER_YEAR + last.month * esm_DAYS_PER_MONTH + last.day;
+                    const totalDaysCurrent = current.year * esm_DAYS_PER_YEAR + current.month * esm_DAYS_PER_MONTH + current.day;
+                    delta = totalDaysCurrent - totalDaysLast;
+                    break;
+                case 'week':
+                    const totalWeeksLast = last.year * 52 + last.week;
+                    const totalWeeksCurrent = current.year * 52 + current.week;
+                    delta = totalWeeksCurrent - totalWeeksLast;
+                    break;
+                case 'month':
+                    const totalMonthsLast = last.year * 12 + last.month;
+                    const totalMonthsCurrent = current.year * 12 + current.month;
+                    delta = totalMonthsCurrent - totalMonthsLast;
+                    break;
+                case 'hour':
+                    const totalHoursLast = last.day * 24 + last.hour;
+                    const totalHoursCurrent = current.day * 24 + current.hour;
+                    delta = totalHoursCurrent - totalHoursLast;
+                    break;
             }
-            return Math.max(0, delta);
+            return delta;
         }
 
         esm_checkAndUpdatePrices() {
             const current = this.esm_getCurrentTime();
-            let priceDelta = this.esm_calcDelta(this.esm_lastUpdate, current, esm_updateCycle);
-            if (priceDelta > 0 && this.esm_isBusinessTime()) {
-                if (esm_crossCycleRule === 'final') priceDelta = 1;
-                this.esm_updateAllPrices(priceDelta);
-            }
-            let fundingDelta = this.esm_calcDelta(this.esm_lastFundingUpdate, current, this.esm_fundingRateUpdateCycle);
-            if (fundingDelta > 0) {
-                this.esm_randomizeFundingRates();
-                this.esm_lastFundingUpdate = current;
-            }
-            const currentHour = $gameVariables.value(esm_hourVar);
-            if (currentHour !== this.esm_lastHour) {
-                this.esm_checkContractConditions();
-                this.esm_lastHour = currentHour;
+            const delta = this.esm_calcDelta(this.esm_lastUpdate, current, esm_updateCycle);
+            if (delta > 0) {
+                if (this.esm_isBusinessTime()) {  // 添加检查，只在营业时间更新价格
+                    this.esm_updateAllPrices(delta);
+                }
+            } else if (delta < 0) {
+                console.warn('Expand_Stockmarket: Time rewound, recalculating...');
             }
             this.esm_lastUpdate = current;
-            return priceDelta;
+        }
+
+        esm_checkAndUpdateFundingRates() {
+            const current = this.esm_getCurrentTime();
+            const delta = this.esm_calcDelta(this.esm_lastFundingUpdate, current, this.esm_fundingRateUpdateCycle);
+            if (delta > 0) {
+                if (this.esm_isBusinessTime()) {  // 添加检查，只在营业时间更新资金费率
+                    this.esm_randomizeFundingRates();
+                }
+            }
+            this.esm_lastFundingUpdate = current;
+        }
+
+        esm_randomizeFundingRates() {
+            this.esm_longFundingRate = Math.random() * (this.esm_longFundingRateMax - this.esm_longFundingRateMin) + this.esm_longFundingRateMin;
+            this.esm_shortFundingRate = Math.random() * (this.esm_shortFundingRateMax - this.esm_shortFundingRateMin) + this.esm_shortFundingRateMin;
+            if (esm_debugLog) console.log('Expand_Stockmarket: Funding rates updated', this.esm_longFundingRate, this.esm_shortFundingRate);
+        }
+
+        esm_setFundingRateBounds(longMin, longMax, shortMin, shortMax) {
+            this.esm_longFundingRateMin = Number(longMin) || esm_longFundingRateMin;
+            this.esm_longFundingRateMax = Number(longMax) || esm_longFundingRateMax;
+            this.esm_shortFundingRateMin = Number(shortMin) || esm_shortFundingRateMin;
+            this.esm_shortFundingRateMax = Number(shortMax) || esm_shortFundingRateMax;
+            this.esm_randomizeFundingRates();
+        }
+
+        esm_updateAllPrices(delta) {
+            esm_stockList.forEach(stock => {
+                const code = stock.code;
+                let price = this.esm_prices[code];
+                for (let i = 0; i < delta; i++) {
+                    price = this.esm_updatePrice(stock, price);
+                }
+                this.esm_prices[code] = price;
+            });
+            this.esm_updateSTStatus();
+            this.esm_save();
+            this.esm_checkContractConditions();  // 保持，但由于调用者在检查营业时间后调用，所以间接受限
+        }
+
+        esm_updatePrice(stock, price) {
+            const code = stock.code;
+            let upProb = esm_globalUpProb + Number(stock.upProb) + this.esm_marketBuffs.global.prob + (this.esm_marketBuffs.singles[code] ? this.esm_marketBuffs.singles[code].prob : 0);
+            upProb = Math.max(0, Math.min(100, upProb));
+            const isUp = Math.random() * 100 < upProb;
+            let amp = isUp ? esm_maxUpAmp + this.esm_marketBuffs.global.upAmp + (this.esm_marketBuffs.singles[code] ? this.esm_marketBuffs.singles[code].upAmp : 0) : esm_maxDownAmp + this.esm_marketBuffs.global.downAmp + (this.esm_marketBuffs.singles[code] ? this.esm_marketBuffs.singles[code].downAmp : 0);
+            amp = Math.random() * amp;
+            price = isUp ? price + price * (amp / 100) : price - price * (amp / 100);
+            price = Math.max(0.01, Math.floor(price * 100) / 100);
+            this.esm_updateHistory(code, price, isUp ? '+' + amp.toFixed(2) + '%' : '-' + amp.toFixed(2) + '%');
+            this.esm_updateOHLC(code, price);
+            return price;
+        }
+
+        esm_updateHistory(code, price, change) {
+            const dayStamp = this.esm_getDayStamp();
+            const hist = this.esm_history[code] || [];
+            let entry = hist[0];
+            if (entry && entry.day === dayStamp) {
+                entry.close = price;
+                entry.high = Math.max(entry.high, price);
+                entry.low = Math.min(entry.low, price);
+                entry.avg = (entry.high + entry.low) / 2;
+                entry.change = change;
+            } else {
+                entry = { day: dayStamp, open: hist[0] ? hist[0].close : price, high: price, low: price, close: price, avg: price, change };
+                hist.unshift(entry);
+                if (hist.length > esm_historyPeriods) hist.pop();
+            }
+            this.esm_history[code] = hist;
+        }
+
+        esm_updateOHLC(code, price) {
+            const periodStamp = this.esm_getTimeStamp();
+            const ohlc = this.esm_ohlcHistory[code] || [];
+            let entry = ohlc[0];
+            if (entry && entry.period === periodStamp) {
+                entry.close = price;
+                entry.high = Math.max(entry.high, price);
+                entry.low = Math.min(entry.low, price);
+            } else {
+                entry = { period: periodStamp, open: ohlc[0] ? ohlc[0].close : price, high: price, low: price, close: price };
+                ohlc.unshift(entry);
+                if (ohlc.length > esm_historyPeriods) ohlc.pop();
+            }
+            this.esm_ohlcHistory[code] = ohlc;
         }
 
         esm_updateSTStatus() {
@@ -1459,222 +1554,56 @@
                 const price = this.esm_prices[code];
                 const isST = price < esm_stThreshold;
                 if (isST !== this.esm_stStatus[code]) {
+                    stock.displayName = isST ? esm_messages.stPrefix + stock.name : stock.name;
                     this.esm_stStatus[code] = isST;
-                    stock.displayName = isST ? (esm_messages.stPrefix || 'ST*') + stock.name : stock.name;
                 }
             });
         }
 
-        esm_getMarketBuff(code) {
-            const globalBuff = this.esm_marketBuffs.global;
-            const singleBuff = this.esm_marketBuffs.singles[code] || {prob: 0, upAmp: 0, downAmp: 0, remaining: 0};
-            return {
-                prob: (globalBuff.remaining > 0 ? globalBuff.prob : 0) + (singleBuff.remaining > 0 ? singleBuff.prob : 0),
-                upAmp: (globalBuff.remaining > 0 ? globalBuff.upAmp : 0) + (singleBuff.remaining > 0 ? singleBuff.upAmp : 0),
-                downAmp: (globalBuff.remaining > 0 ? globalBuff.downAmp : 0) + (singleBuff.remaining > 0 ? singleBuff.downAmp : 0)
-            };
-        }
-
-        esm_applyMarketBuffs(delta) {
-            if (this.esm_marketBuffs.global.remaining > 0) {
-                this.esm_marketBuffs.global.remaining -= delta;
-                if (this.esm_marketBuffs.global.remaining <= 0) {
-                    this.esm_marketBuffs.global = {prob: 0, upAmp: 0, downAmp: 0, remaining: 0};
-                }
-            }
-            Object.keys(this.esm_marketBuffs.singles).forEach(code => {
-                if (this.esm_marketBuffs.singles[code].remaining > 0) {
-                    this.esm_marketBuffs.singles[code].remaining -= delta;
-                    if (this.esm_marketBuffs.singles[code].remaining <= 0) {
-                        this.esm_marketBuffs.singles[code] = {prob: 0, upAmp: 0, downAmp: 0, remaining: 0};
-                    }
-                }
-            });
-        }
-
-        esm_calcUpProb(stock) {
-            let prob = Number(stock.upProb) + esm_globalUpProb;
-            const buff = this.esm_getMarketBuff(stock.code);
-            prob += buff.prob;
-            const t = this.esm_getCurrentTime();
-            if (stock.periodBias === 'morning_up20' && t.period === 1) prob += 20;
-            if (stock.periodBias === 'evening_down15' && t.period === 4) prob -= 15;
-            if (stock.cycleBias === 'month_first_up30' && t.day <= esm_DAYS_PER_WEEK) prob += 30;
-            if (stock.cycleBias === 'week_last_down25' && t.week === 6 || t.week === 7) prob -= 25;
-            return Math.max(0, Math.min(100, prob));
-        }
-
-        esm_updatePrice(stock, delta = 1) {
-            const code = stock.code;
-            let price = this.esm_prices[code];
-            const upProb = this.esm_calcUpProb(stock);
-            const buff = this.esm_getMarketBuff(code);
-            const maxUp = Number(stock.upAmp) + buff.upAmp;
-            const maxDown = Number(stock.downAmp) + buff.downAmp;
-            let change = 0;
-            for (let i = 0; i < delta; i++) {
-                const isUp = Math.random() * 100 < upProb;
-                const amp = isUp ? Math.random() * maxUp : Math.random() * maxDown;
-                change += (isUp ? 1 : -1) * amp / 100 * price;
-                price += change;
-                price = Math.max(0.01, price);
-                this.esm_prices[code] = price;
-                this.esm_trendCounters[code][isUp ? 'up' : 'down']++;
-                this.esm_recordHistory(code, price, isUp ? `+${amp.toFixed(2)}%` : `-${amp.toFixed(2)}%`);
-                this.esm_recordOHLC(code, price);
-            }
-            this.esm_applyMarketBuffs(delta);
-            this.esm_updateSTStatus();
-        }
-
-        esm_updateAllPrices(delta = 1) {
-            esm_stockList.forEach(stock => this.esm_updatePrice(stock, delta));
-            this.esm_save();
-        }
-
-        esm_recordHistory(code, price, change) {
-            const day = this.esm_getDayStamp();
-            const hist = this.esm_history[code];
-            let entry = hist.find(e => e.day === day);
-            if (!entry) {
-                entry = { day, prices: [], avg: 0, change };
-                hist.unshift(entry);
-                if (hist.length > esm_historyPeriods) hist.pop();
-            }
-            entry.prices.push(price);
-            entry.avg = entry.prices.reduce((a, b) => a + b, 0) / entry.prices.length;
-            entry.change = change;
-        }
-
-        esm_recordOHLC(code) {
-            const period = this.esm_getTimeStamp();
-            const hist = this.esm_ohlcHistory[code];
-            let entry = hist.find(e => e.period === period);
-            const price = this.esm_prices[code];
-            if (!entry) {
-                entry = { period, open: price, high: price, low: price, close: price };
-                hist.unshift(entry);
-                if (hist.length > esm_historyPeriods) hist.pop();
-            } else {
-                entry.high = Math.max(entry.high, price);
-                entry.low = Math.min(entry.low, price);
-                entry.close = price;
-            }
-        }
-
-        esm_getCurrentVIP() {
-            const totalAssets = this.esm_getTotalAssets();
+        esm_calculateVIP() {
+            const totalAssets = this.esm_account + this.esm_getTotalHoldingsValue();
             let vip = 0;
-            for (let level = 7; level >= 1; level--) {
-                if (totalAssets >= esm_vipThresholds[`vip${level}`]) {
-                    vip = level;
+            for (let i = 7; i >= 1; i--) {
+                if (totalAssets >= esm_vipThresholds['vip' + i]) {
+                    vip = i;
                     break;
                 }
             }
+            esm_safeSetValue(esm_vipVar, vip);
+            const rate = esm_feeRates['vip' + vip];
+            esm_safeSetValue(esm_feeRateVar, rate);
             return vip;
+        }
+
+        esm_getTotalHoldingsValue() {
+            let value = 0;
+            esm_stockList.forEach(stock => {
+                const code = stock.code;
+                value += (this.esm_holdings[code] || 0) * this.esm_prices[code];
+            });
+            return Math.floor(value);
+        }
+
+        esm_getCurrentVIP() {
+            return $gameVariables.value(esm_vipVar) || 0;
         }
 
         esm_getCurrentFeeRate() {
             const vip = this.esm_getCurrentVIP();
-            const rate = esm_feeRates[`vip${vip}`] || esm_feeRates.vip0;
+            const rate = esm_feeRates['vip' + vip];
             return { vip, rate };
         }
 
         esm_getFeeRate(vip) {
-            return esm_feeRates[`vip${vip}`] || esm_feeRates.vip0;
-        }
-
-        esm_getTotalAssets() {
-            let totalValue = this.esm_account;
-            esm_stockList.forEach(stock => {
-                const code = stock.code;
-                const hold = this.esm_holdings[code] || 0;
-                if (hold > 0) {
-                    totalValue += hold * this.esm_prices[code];
-                }
-            });
-            return Math.floor(totalValue);
-        }
-
-        esm_calculateVIP() {
-            const vip = this.esm_getCurrentVIP();
-            esm_safeSetValue(esm_vipVar, vip);
-            esm_safeSetValue(esm_feeRateVar, this.esm_getCurrentFeeRate().rate);
-            return vip;
+            return esm_feeRates['vip' + vip] || esm_feeRates.vip0;
         }
 
         esm_queryFeeRate(outputVar = 0) {
             const { vip, rate } = this.esm_getCurrentFeeRate();
-            const msg = esm_messages.feeRateMsg.replace('%1', vip).replace('%2', rate).replace('%3', (rate * 100).toFixed(2));
+            const percent = (rate * 100).toFixed(2);
+            const msg = esm_messages.feeRateMsg.replace('%1', vip).replace('%2', rate).replace('%3', percent);
             $gameMessage.add(msg);
             if (outputVar > 0) esm_safeSetValue(outputVar, rate);
-        }
-
-        esm_randomizeFundingRates(forceDefault = false) {
-            let longMin = this.esm_longFundingRateMin;
-            let longMax = this.esm_longFundingRateMax;
-            let shortMin = this.esm_shortFundingRateMin;
-            let shortMax = this.esm_shortFundingRateMax;
-            if (forceDefault) {
-                longMin = -0.0005;
-                longMax = 0.0005;
-                shortMin = -0.0005;
-                shortMax = 0.0005;
-            }
-            if (longMin >= longMax || shortMin >= shortMax) {
-                $gameMessage.add(esm_messages.invalidFundingRange);
-                if (esm_debugLog) console.warn('Expand_Stockmarket: Invalid funding range, using default.');
-                longMin = -0.0005;
-                longMax = 0.0005;
-                shortMin = -0.0005;
-                shortMax = 0.0005;
-            }
-            // 随机long，非0
-            let longRate = 0;
-            while (longRate === 0) {
-                longRate = Number((Math.random() * (longMax - longMin) + longMin).toFixed(5));
-            }
-            // 强制short符号相反，非0
-            let shortRangeMin, shortRangeMax;
-            if (longRate > 0) {
-                // short必须负
-                shortRangeMin = shortMin;
-                shortRangeMax = Math.min(0, shortMax);
-                if (shortRangeMin >= shortRangeMax) {
-                    $gameMessage.add(esm_messages.invalidFundingRange);
-                    if (esm_debugLog) console.warn('Expand_Stockmarket: Short range cannot be negative, using default.');
-                    this.esm_randomizeFundingRates(true);
-                    return;
-                }
-            } else {
-                // short必须正
-                shortRangeMin = Math.max(0, shortMin);
-                shortRangeMax = shortMax;
-                if (shortRangeMin >= shortRangeMax) {
-                    $gameMessage.add(esm_messages.invalidFundingRange);
-                    if (esm_debugLog) console.warn('Expand_Stockmarket: Short range cannot be positive, using default.');
-                    this.esm_randomizeFundingRates(true);
-                    return;
-                }
-            }
-            let shortRate = 0;
-            while (shortRate === 0) {
-                shortRate = Number((Math.random() * (shortRangeMax - shortRangeMin) + shortRangeMin).toFixed(5));
-            }
-            this.esm_longFundingRate = longRate;
-            this.esm_shortFundingRate = shortRate;
-            this.esm_save();
-            if (esm_debugLog) console.log('Expand_Stockmarket: Funding rates randomized to', longRate, shortRate);
-        }
-
-        esm_setFundingRateBounds(longMin, longMax, shortMin, shortMax) {
-            this.esm_longFundingRateMin = Number(longMin);
-            this.esm_longFundingRateMax = Number(longMax);
-            this.esm_shortFundingRateMin = Number(shortMin);
-            this.esm_shortFundingRateMax = Number(shortMax);
-            this.esm_randomizeFundingRates();
-            const msg = esm_messages.fundingRateMsg.replace('%1', this.esm_longFundingRate.toFixed(5)).replace('%2', this.esm_shortFundingRate.toFixed(5));
-            $gameMessage.add(msg);
             this.esm_save();
         }
 
@@ -1994,11 +1923,11 @@
                 if (marginRequired + fee > this.esm_margin) return $gameMessage.add(esm_messages.marginInsufficient);
                 // 处理反向仓位 (净仓模式)
                 const oppositeDir = direction === 'long' ? 'short' : 'long';
-                if (this.esm_positions[code][oppositeDir]) {
-                    const oppPos = this.esm_positions[code][oppositeDir];
-                    const closeQty = Math.min(quantity, oppPos.quantity);
+                const oppositePos = this.esm_positions[code][oppositeDir];
+                if (oppositePos) {
+                    const closeQty = Math.min(quantity, oppositePos.quantity);
                     this.esm_closePosition(code, closeQty, oppositeDir, true);
-                    if (oppPos.quantity === 0) this.esm_positions[code][oppositeDir] = null;
+                    if (oppositePos.quantity === 0) this.esm_positions[code][oppositeDir] = null;
                     quantity -= closeQty;
                     if (quantity <= 0) return;
                 }
@@ -2063,6 +1992,7 @@
         }
 
         esm_checkContractConditions() {
+            if (!this.esm_isBusinessTime()) return;  // 添加检查，只在营业时间执行合约后台检查
             esm_stockList.forEach(stock => {
                 const code = stock.code;
                 const price = this.esm_prices[code];
@@ -2326,7 +2256,6 @@
                 case 'QueryStockPrice': this.esm_queryStockPrice(); break;
                 case 'QueryCompanyInfo': this.esm_queryCompanyInfo(); break;
                 case 'QueryHistory': this.esm_queryHistory($gameVariables.value(esm_inputAmountVar)); break;
-                case 'CloseAllPositions': this.esm_closeAllPositions(); break;
                 case 'QueryFeeRate':
                     const output = Number(args.outputVar || 0);
                     this.esm_queryFeeRate(output);
@@ -2354,6 +2283,7 @@
                     const closeCode = $gameVariables.value(esm_inputCodeVar).toString().padStart(3, '0');
                     this.esm_closePosition(closeCode, $gameVariables.value(esm_inputAmountVar)); 
                     break;
+                case 'CloseAllPositions': this.esm_closeAllPositions(); break;
                 case 'QueryPositions': this.esm_queryPositions(); break;
                 case 'QuerySinglePosition': this.esm_querySinglePosition(); break;
                 case 'PlaceOrder': 
@@ -2471,6 +2401,7 @@
         _Scene_Map_start.call(this);
         if (esm_updateTrigger === 'auto' || esm_updateTrigger === 'both') {
             esm_manager.esm_checkAndUpdatePrices();
+            esm_manager.esm_checkAndUpdateFundingRates();  // 添加资金费率检查
         }
     };
 
@@ -2479,6 +2410,7 @@
         _Scene_Map_update.call(this);
         if (esm_updateTrigger === 'auto' || esm_updateTrigger === 'both') {
             esm_manager.esm_checkAndUpdatePrices();
+            esm_manager.esm_checkAndUpdateFundingRates();  // 添加资金费率检查
         }
     };
 
