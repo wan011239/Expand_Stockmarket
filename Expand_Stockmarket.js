@@ -1218,16 +1218,6 @@
         }
     }
 
-    // 高斯随机函数
-    function gaussRand(mean, sd) {
-        let u = 0, v = 0;
-        while (u === 0) u = Math.random();
-        while (v === 0) v = Math.random();
-        let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-        num = num * sd + mean;
-        return num;
-    }
-
     // ExpandStockManager类
     class ExpandStockManager {
         constructor() {
@@ -1259,7 +1249,6 @@
             this.esm_lastHour = 1;
             this.esm_lastCheckFrame = 0;
             this.esm_cumulativeDeposit = 0;
-            this.esm_firstLoad = true; // 新增: 初始化标志
             this.esm_initStocks(esm_stockList);
         }
 
@@ -1367,14 +1356,13 @@
                 } else {
                     this.esm_positions = this.esm_initPositions(safeJsonParse($gameVariables.value(esm_contractPositionsVar)) || {});
                     this.esm_orders = safeJsonParse($gameVariables.value(esm_contractOrdersVar) || '[]');
-                    this.esm_ohlcHistory = safeJsonParse($gameVariables.value(esm_contractHistoryVar) || {});
+                    this.esm_ohlcHistory = safeJsonParse($gameVariables.value(esm_contractHistoryVar)) || {};
                 }
                 this.esm_orderIdCounter = this.esm_orders.length > 0 ? Math.max(...this.esm_orders.map(o => o.id)) + 1 : 0;
                 this.esm_lastHour = $gameVariables.value(esm_hourVar) || 1;
                 if (this.esm_longFundingRate === 0 && this.esm_shortFundingRate === 0) {
                     this.esm_randomizeFundingRates();
                 }
-                this.esm_firstLoad = true; // 设置为true，以便首次检查时跳过更新
                 console.log('Expand_Stockmarket: Load successful.');
             } catch (e) {
                 console.error('Expand_Stockmarket: Load failed', e);
@@ -1397,7 +1385,6 @@
                 this.esm_orderIdCounter = 0;
                 this.esm_lastHour = 1;
                 esm_stockList.forEach(stock => this.esm_positions[stock.code] = { long: null, short: null });
-                this.esm_firstLoad = true;
             }
         }
 
@@ -1435,242 +1422,194 @@
                 case 'period':
                     const totalLast = last.day * esm_PERIODS_PER_DAY + last.period;
                     const totalCurrent = current.day * esm_PERIODS_PER_DAY + current.period;
-                    delta = totalCurrent - totalLast + (current.month - last.month) * esm_DAYS_PER_MONTH * esm_PERIODS_PER_DAY + (current.year - last.year) * esm_DAYS_PER_YEAR * esm_PERIODS_PER_DAY;
+                    delta = totalCurrent - totalLast;
                     break;
                 case 'day':
-                    delta = current.day - last.day + (current.month - last.month) * esm_DAYS_PER_MONTH + (current.year - last.year) * esm_DAYS_PER_YEAR;
+                    const totalDaysLast = last.year * esm_DAYS_PER_YEAR + last.month * esm_DAYS_PER_MONTH + last.day;
+                    const totalDaysCurrent = current.year * esm_DAYS_PER_YEAR + current.month * esm_DAYS_PER_MONTH + current.day;
+                    delta = totalDaysCurrent - totalDaysLast;
                     break;
                 case 'week':
-                    delta = current.week - last.week + (current.month - last.month) * (esm_DAYS_PER_MONTH / esm_DAYS_PER_WEEK) + (current.year - last.year) * (esm_DAYS_PER_YEAR / esm_DAYS_PER_WEEK);
+                    const totalWeeksLast = last.year * 52 + last.week;
+                    const totalWeeksCurrent = current.year * 52 + current.week;
+                    delta = totalWeeksCurrent - totalWeeksLast;
                     break;
                 case 'month':
-                    delta = current.month - last.month + (current.year - last.year) * 12;
+                    const totalMonthsLast = last.year * 12 + last.month;
+                    const totalMonthsCurrent = current.year * 12 + current.month;
+                    delta = totalMonthsCurrent - totalMonthsLast;
                     break;
                 case 'hour':
-                    delta = current.hour - last.hour + (current.day - last.day) * 24 + (current.month - last.month) * esm_DAYS_PER_MONTH * 24 + (current.year - last.year) * esm_DAYS_PER_YEAR * 24;
+                    const totalHoursLast = last.day * 24 + last.hour;
+                    const totalHoursCurrent = current.day * 24 + current.hour;
+                    delta = totalHoursCurrent - totalHoursLast;
                     break;
             }
-            return Math.max(0, Math.floor(delta));
-        }
-
-        esm_calculateEffectiveDelta(delta) {
-            const weekFactor = esm_businessWeeks.length / 7; // e.g., 5/7
-            const periodFactor = esm_businessPeriods.length / esm_PERIODS_PER_DAY; // e.g., 2/4 = 0.5
-            return Math.floor(delta * weekFactor * periodFactor);
+            return delta;
         }
 
         esm_checkAndUpdatePrices() {
-            if (esm_updateCycle === 'none') return;
             const current = this.esm_getCurrentTime();
             const delta = this.esm_calcDelta(this.esm_lastUpdate, current, esm_updateCycle);
-            if (this.esm_firstLoad) {
-                this.esm_lastUpdate = current;
-                this.esm_firstLoad = false;
-                return;
-            }
-            if (delta > 10000) {
-                console.warn('Expand_Stockmarket: Large time jump detected, skipping price update to prevent explosion.');
-                this.esm_lastUpdate = current;
-                return;
-            }
             if (delta > 0) {
-                this.esm_updateAllPrices(delta);
-                this.esm_lastUpdate = current;
-            }
-        }
-
-        esm_updateAllPrices(delta) {
-            const effectiveDelta = this.esm_calculateEffectiveDelta(delta);
-            if (effectiveDelta === 0) return;
-            esm_stockList.forEach(stock => {
-                const code = stock.code;
-                if (effectiveDelta <= 10) {
-                    for (let i = 0; i < effectiveDelta; i++) {
-                        this.esm_updatePrice(code);
-                    }
-                } else {
-                    this.esm_updatePriceApproximation(code, effectiveDelta);
+                if (this.esm_isBusinessTime()) {  // 添加检查，只在营业时间更新价格
+                    this.esm_updateAllPrices(delta);
                 }
-            });
-            this.esm_save();
-        }
-
-        esm_updatePrice(code, multiplier = 1) {
-            const stock = esm_stockList.find(s => s.code === code);
-            if (!stock) return;
-            const baseUpProb = esm_globalUpProb + Number(stock.upProb || 0);
-            const buff = this.esm_getMarketBuff(code);
-            const upProb = baseUpProb + buff.prob;
-            const isUp = Math.random() * 100 < upProb;
-            const ampBase = isUp ? esm_maxUpAmp + Number(stock.upAmp || 0) + buff.upAmp : esm_maxDownAmp + Number(stock.downAmp || 0) + buff.downAmp;
-            const amp = Math.random() * ampBase * (isUp ? 1 : -1) * multiplier;
-            const change = amp / 100;
-            let price = this.esm_prices[code];
-            price = Math.max(1, price * (1 + change));
-            this.esm_prices[code] = price;
-            this.esm_updateSTStatus(code);
-            this.esm_updateTrendCounter(code, isUp ? 'up' : 'down');
-            const dayStamp = this.esm_getDayStamp();
-            const entry = { day: dayStamp, avg: price, change: (change * 100).toFixed(2) + '%' };
-            this.esm_history[code].unshift(entry);
-            if (this.esm_history[code].length > esm_historyPeriods) this.esm_history[code].pop();
-            const ohlcEntry = { period: dayStamp, open: price / (1 + change), high: price * (1 + Math.abs(change) * 0.5), low: price * (1 - Math.abs(change) * 0.5), close: price };
-            this.esm_ohlcHistory[code].unshift(ohlcEntry);
-            if (this.esm_ohlcHistory[code].length > esm_historyPeriods) this.esm_ohlcHistory[code].pop();
-        }
-
-        esm_updatePriceApproximation(code, delta) {
-            const stock = esm_stockList.find(s => s.code === code);
-            if (!stock) return;
-            const baseUpProb = esm_globalUpProb + Number(stock.upProb || 0);
-            const buff = this.esm_getMarketBuff(code);
-            const upProb = baseUpProb + buff.prob;
-            const p = upProb / 100;
-            const upAmp = esm_maxUpAmp + Number(stock.upAmp || 0) + buff.upAmp;
-            const downAmp = esm_maxDownAmp + Number(stock.downAmp || 0) + buff.downAmp;
-            const upA = upAmp / 100;
-            const downA = downAmp / 100;
-            const single_mean = p * (upA / 2) - (1 - p) * (downA / 2);
-            const single_var = p * (upA * upA / 3) + (1 - p) * (downA * downA / 3) - single_mean * single_mean;
-            const total_mean = delta * single_mean;
-            const total_sd = Math.sqrt(delta * single_var);
-            let total_change = gaussRand(total_mean, total_sd);
-            total_change = Math.max(-0.9, Math.min(0.9, total_change)); // 防止极端值
-            let price = this.esm_prices[code];
-            price = Math.max(1, price * (1 + total_change));
-            this.esm_prices[code] = price;
-            this.esm_updateSTStatus(code);
-            this.esm_updateTrendCounter(code, total_change > 0 ? 'up' : 'down');
-            const dayStamp = this.esm_getDayStamp();
-            const entry = { day: dayStamp, avg: price, change: (total_change * 100).toFixed(2) + '% (approx over ' + delta + ' periods)' };
-            this.esm_history[code].unshift(entry);
-            if (this.esm_history[code].length > esm_historyPeriods) this.esm_history[code].pop();
-            const approxOpen = price / (1 + total_change);
-            const ohlcEntry = { period: dayStamp, open: approxOpen, high: Math.max(price, approxOpen), low: Math.min(price, approxOpen), close: price };
-            this.esm_ohlcHistory[code].unshift(ohlcEntry);
-            if (this.esm_ohlcHistory[code].length > esm_historyPeriods) this.esm_ohlcHistory[code].pop();
-        }
-
-        esm_getMarketBuff(code) {
-            const global = this.esm_marketBuffs.global;
-            const single = this.esm_marketBuffs.singles[code] || {prob: 0, upAmp: 0, downAmp: 0, remaining: 0};
-            if (global.remaining > 0) global.remaining--;
-            if (single.remaining > 0) single.remaining--;
-            return {
-                prob: global.prob + single.prob,
-                upAmp: global.upAmp + single.upAmp,
-                downAmp: global.downAmp + single.downAmp
-            };
-        }
-
-        esm_updateSTStatus(code = null) {
-            if (code) {
-                const price = this.esm_prices[code];
-                const stock = esm_stockList.find(s => s.code === code);
-                if (price < esm_stThreshold) {
-                    if (!this.esm_stStatus[code]) {
-                        stock.displayName = esm_messages.stPrefix + stock.name;
-                        this.esm_stStatus[code] = true;
-                    }
-                } else {
-                    if (this.esm_stStatus[code]) {
-                        stock.displayName = stock.name;
-                        this.esm_stStatus[code] = false;
-                    }
-                }
-            } else {
-                esm_stockList.forEach(stock => this.esm_updateSTStatus(stock.code));
+            } else if (delta < 0) {
+                console.warn('Expand_Stockmarket: Time rewound, recalculating...');
             }
-        }
-
-        esm_updateTrendCounter(code, direction) {
-            const counter = this.esm_trendCounters[code];
-            if (direction === 'up') {
-                counter.up++;
-                counter.down = 0;
-            } else {
-                counter.down++;
-                counter.up = 0;
-            }
-        }
-
-        esm_getCurrentVIP() {
-            const totalAssets = this.esm_account + this.esm_calculateTotalHoldingsValue();
-            let vip = 0;
-            for (let level = 7; level >= 1; level--) {
-                if (totalAssets >= esm_vipThresholds[`vip${level}`]) {
-                    vip = level;
-                    break;
-                }
-            }
-            esm_safeSetValue(esm_vipVar, vip);
-            return vip;
-        }
-
-        esm_calculateVIP() {
-            const vip = this.esm_getCurrentVIP();
-            esm_safeSetValue(esm_feeRateVar, this.esm_getFeeRate(vip));
-            return vip;
-        }
-
-        esm_getFeeRate(vip) {
-            return esm_feeRates[`vip${vip}`] || esm_feeRates.vip0;
-        }
-
-        esm_getCurrentFeeRate() {
-            const vip = $gameVariables.value(esm_vipVar) || 0;
-            const rate = this.esm_getFeeRate(vip);
-            return { vip, rate };
-        }
-
-        esm_queryFeeRate(outputVar = 0) {
-            const { vip, rate } = this.esm_getCurrentFeeRate();
-            const percent = (rate * 100).toFixed(2);
-            $gameMessage.add(esm_messages.feeRateMsg.replace('%1', vip).replace('%2', rate).replace('%3', percent));
-            if (outputVar > 0) esm_safeSetValue(outputVar, rate);
-        }
-
-        esm_calculateTotalHoldingsValue() {
-            let value = 0;
-            esm_stockList.forEach(stock => {
-                const code = stock.code;
-                const hold = this.esm_holdings[code] || 0;
-                if (hold > 0) value += hold * this.esm_prices[code];
-            });
-            return value;
-        }
-
-        esm_randomizeFundingRates() {
-            this.esm_longFundingRate = esm_longFundingRateMin + Math.random() * (esm_longFundingRateMax - esm_longFundingRateMin);
-            this.esm_shortFundingRate = esm_shortFundingRateMin + Math.random() * (esm_shortFundingRateMax - esm_shortFundingRateMin);
-            if (esm_debugLog) console.log('Expand_Stockmarket: Funding rates randomized:', this.esm_longFundingRate, this.esm_shortFundingRate);
+            this.esm_lastUpdate = current;
         }
 
         esm_checkAndUpdateFundingRates() {
             const current = this.esm_getCurrentTime();
             const delta = this.esm_calcDelta(this.esm_lastFundingUpdate, current, this.esm_fundingRateUpdateCycle);
             if (delta > 0) {
-                this.esm_randomizeFundingRates();
-                this.esm_lastFundingUpdate = current;
+                if (this.esm_isBusinessTime()) {  // 添加检查，只在营业时间更新资金费率
+                    this.esm_randomizeFundingRates();
+                }
             }
+            this.esm_lastFundingUpdate = current;
+        }
+
+        esm_randomizeFundingRates() {
+            this.esm_longFundingRate = Math.random() * (this.esm_longFundingRateMax - this.esm_longFundingRateMin) + this.esm_longFundingRateMin;
+            this.esm_shortFundingRate = Math.random() * (this.esm_shortFundingRateMax - this.esm_shortFundingRateMin) + this.esm_shortFundingRateMin;
+            if (esm_debugLog) console.log('Expand_Stockmarket: Funding rates updated', this.esm_longFundingRate, this.esm_shortFundingRate);
         }
 
         esm_setFundingRateBounds(longMin, longMax, shortMin, shortMax) {
-            longMin = Number(longMin);
-            longMax = Number(longMax);
-            shortMin = Number(shortMin);
-            shortMax = Number(shortMax);
-            if (longMin > longMax || shortMin > shortMax || (longMax * shortMax < 0 && longMin * shortMin < 0)) return $gameMessage.add(esm_messages.invalidFundingRange);
-            this.esm_longFundingRateMin = longMin;
-            this.esm_longFundingRateMax = longMax;
-            this.esm_shortFundingRateMin = shortMin;
-            this.esm_shortFundingRateMax = shortMax;
+            this.esm_longFundingRateMin = Number(longMin) || esm_longFundingRateMin;
+            this.esm_longFundingRateMax = Number(longMax) || esm_longFundingRateMax;
+            this.esm_shortFundingRateMin = Number(shortMin) || esm_shortFundingRateMin;
+            this.esm_shortFundingRateMax = Number(shortMax) || esm_shortFundingRateMax;
             this.esm_randomizeFundingRates();
+        }
+
+        esm_updateAllPrices(delta) {
+            esm_stockList.forEach(stock => {
+                const code = stock.code;
+                let price = this.esm_prices[code];
+                for (let i = 0; i < delta; i++) {
+                    price = this.esm_updatePrice(stock, price);
+                }
+                this.esm_prices[code] = price;
+            });
+            this.esm_updateSTStatus();
+            this.esm_save();
+            this.esm_checkContractConditions();  // 保持，但由于调用者在检查营业时间后调用，所以间接受限
+        }
+
+        esm_updatePrice(stock, price) {
+            const code = stock.code;
+            let upProb = esm_globalUpProb + Number(stock.upProb) + this.esm_marketBuffs.global.prob + (this.esm_marketBuffs.singles[code] ? this.esm_marketBuffs.singles[code].prob : 0);
+            upProb = Math.max(0, Math.min(100, upProb));
+            const isUp = Math.random() * 100 < upProb;
+            let amp = isUp ? esm_maxUpAmp + this.esm_marketBuffs.global.upAmp + (this.esm_marketBuffs.singles[code] ? this.esm_marketBuffs.singles[code].upAmp : 0) : esm_maxDownAmp + this.esm_marketBuffs.global.downAmp + (this.esm_marketBuffs.singles[code] ? this.esm_marketBuffs.singles[code].downAmp : 0);
+            amp = Math.random() * amp;
+            price = isUp ? price + price * (amp / 100) : price - price * (amp / 100);
+            price = Math.max(0.01, Math.floor(price * 100) / 100);
+            this.esm_updateHistory(code, price, isUp ? '+' + amp.toFixed(2) + '%' : '-' + amp.toFixed(2) + '%');
+            this.esm_updateOHLC(code, price);
+            return price;
+        }
+
+        esm_updateHistory(code, price, change) {
+            const dayStamp = this.esm_getDayStamp();
+            const hist = this.esm_history[code] || [];
+            let entry = hist[0];
+            if (entry && entry.day === dayStamp) {
+                entry.close = price;
+                entry.high = Math.max(entry.high, price);
+                entry.low = Math.min(entry.low, price);
+                entry.avg = (entry.high + entry.low) / 2;
+                entry.change = change;
+            } else {
+                entry = { day: dayStamp, open: hist[0] ? hist[0].close : price, high: price, low: price, close: price, avg: price, change };
+                hist.unshift(entry);
+                if (hist.length > esm_historyPeriods) hist.pop();
+            }
+            this.esm_history[code] = hist;
+        }
+
+        esm_updateOHLC(code, price) {
+            const periodStamp = this.esm_getTimeStamp();
+            const ohlc = this.esm_ohlcHistory[code] || [];
+            let entry = ohlc[0];
+            if (entry && entry.period === periodStamp) {
+                entry.close = price;
+                entry.high = Math.max(entry.high, price);
+                entry.low = Math.min(entry.low, price);
+            } else {
+                entry = { period: periodStamp, open: ohlc[0] ? ohlc[0].close : price, high: price, low: price, close: price };
+                ohlc.unshift(entry);
+                if (ohlc.length > esm_historyPeriods) ohlc.pop();
+            }
+            this.esm_ohlcHistory[code] = ohlc;
+        }
+
+        esm_updateSTStatus() {
+            esm_stockList.forEach(stock => {
+                const code = stock.code;
+                const price = this.esm_prices[code];
+                const isST = price < esm_stThreshold;
+                if (isST !== this.esm_stStatus[code]) {
+                    stock.displayName = isST ? esm_messages.stPrefix + stock.name : stock.name;
+                    this.esm_stStatus[code] = isST;
+                }
+            });
+        }
+
+        esm_calculateVIP() {
+            const totalAssets = this.esm_account + this.esm_getTotalHoldingsValue();
+            let vip = 0;
+            for (let i = 7; i >= 1; i--) {
+                if (totalAssets >= esm_vipThresholds['vip' + i]) {
+                    vip = i;
+                    break;
+                }
+            }
+            esm_safeSetValue(esm_vipVar, vip);
+            const rate = esm_feeRates['vip' + vip];
+            esm_safeSetValue(esm_feeRateVar, rate);
+            return vip;
+        }
+
+        esm_getTotalHoldingsValue() {
+            let value = 0;
+            esm_stockList.forEach(stock => {
+                const code = stock.code;
+                value += (this.esm_holdings[code] || 0) * this.esm_prices[code];
+            });
+            return Math.floor(value);
+        }
+
+        esm_getCurrentVIP() {
+            return $gameVariables.value(esm_vipVar) || 0;
+        }
+
+        esm_getCurrentFeeRate() {
+            const vip = this.esm_getCurrentVIP();
+            const rate = esm_feeRates['vip' + vip];
+            return { vip, rate };
+        }
+
+        esm_getFeeRate(vip) {
+            return esm_feeRates['vip' + vip] || esm_feeRates.vip0;
+        }
+
+        esm_queryFeeRate(outputVar = 0) {
+            const { vip, rate } = this.esm_getCurrentFeeRate();
+            const percent = (rate * 100).toFixed(2);
+            const msg = esm_messages.feeRateMsg.replace('%1', vip).replace('%2', rate).replace('%3', percent);
+            $gameMessage.add(msg);
+            if (outputVar > 0) esm_safeSetValue(outputVar, rate);
             this.esm_save();
         }
 
         esm_queryFundingRate(outputLongVar = 0, outputShortVar = 0) {
-            $gameMessage.add(esm_messages.fundingRateMsg.replace('%1', this.esm_longFundingRate.toFixed(4)).replace('%2', this.esm_shortFundingRate.toFixed(4)));
+            const msg = esm_messages.fundingRateMsg.replace('%1', this.esm_longFundingRate.toFixed(5)).replace('%2', this.esm_shortFundingRate.toFixed(5));
+            $gameMessage.add(msg);
             if (outputLongVar > 0) esm_safeSetValue(outputLongVar, this.esm_longFundingRate);
             if (outputShortVar > 0) esm_safeSetValue(outputShortVar, this.esm_shortFundingRate);
         }
