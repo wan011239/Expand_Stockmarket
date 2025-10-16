@@ -1,0 +1,899 @@
+/*:
+ * @plugindesc v1.0.0 手机系统购物APP扩展插件，提供购物功能，点击列表项时打开独立的购物窗口。
+ * @author Grok 4 (根据用户需求设计)
+ *
+ * 插件名：UI_Phone_shopping
+ * 用到的原生内容：扩展了DataManager.onLoad（用alias）、Scene_Map.prototype.update（用alias）、Scene_Map.prototype.updatePhoneWindow（用alias）、Scene_Map.prototype.isTouchOnPhoneUI（用alias）、Game_Variables.prototype.setValue（用alias）；新增Window_Shopping类继承Window_Base；新增Scene_Map.prototype.UIPS_createShoppingWindow, UIPS_closeShoppingWindow, UIPS_updateShoppingWindow
+ * 冲突提示：若其他插件也修改了DataManager.onLoad、Scene_Map的update、updatePhoneWindow、isTouchOnPhoneUI或Game_Variables.setValue方法，请确保本插件在其之后加载；集成System_Time.js，确保时间变量ID一致。
+ *
+ * @param app图标
+ * @desc 该APP的网格图标文件名，位于 img/phone/shopping 文件夹。
+ * @type file
+ * @dir img/phone/
+ * @default shopping/shopping_icon
+ *
+ * @param app名称
+ * @desc APP的显示名称，显示在图标下方。
+ * @type string
+ * @default 购物
+ *
+ * @param app背景
+ * @desc 该APP子菜单的背景图片文件名，位于 img/phone/shopping 文件夹（可选）。
+ * @type file
+ * @dir img/phone/
+ * @default shopping/shopping_bg
+ *
+ * @param 开关ID
+ * @desc 该APP的开关ID（游戏开关）。
+ * @type switch
+ * @default 44
+ *
+ * @param 购物项设置
+ * @desc 购物项APP的相关设置。
+ * @type struct<ShoppingSettings>
+ *
+ * @param 显示范围设置
+ * @desc 购物项APP显示范围的相关设置。
+ * @type struct<ShoppingDisplayRange>
+ *
+ * @param 购物窗口
+ * @desc 购物窗口的相关设置。
+ * @type struct<ShoppingWindowSettings>
+ *
+ * @param 购物网格
+ * @desc 购物网格的相关设置。
+ * @type struct<ShoppingGridSettings>
+ *
+ * @param 商品信息
+ * @desc 商品信息位置的相关设置（全局）。
+ * @type struct<ShopItemSettings>
+ *
+ * @param 商品窗口背景
+ * @desc 商品窗口背景的相关设置。
+ * @type struct<ShopWindowBgSettings>
+ *
+ * @param 价格单位
+ * @desc 价格的单位符号。
+ * @type string
+ * @default G
+ *
+ * @param 时间变量
+ * @desc 时间变量的相关设置。
+ * @type struct<TimeVarsSettings>
+ *
+ * @param 销售限制
+ * @desc 销售限制的设置。
+ * @type struct<SalesLimit>[]
+ * @default []
+ *
+ * @param deliveryDays
+ * @text 发货时间
+ * @type number
+ * @min 0
+ * @default 3
+ * @desc 购买后延迟的天数，默认3天。
+ *
+ * @param deliveryVar
+ * @text 快递驿站
+ * @type variable
+ * @default 85
+ * @desc 当有到期快递时设为1，无则0，用于事件分支显示气泡。
+ *
+ * @command deliveryStation
+ * @text 快递驿站
+ * @desc 领取到期货物，一次性处理所有可领订单。
+ *
+ * @help
+ * ====================================================================
+ * 插件说明：
+ * ====================================================================
+ * - 本插件扩展UI_Phone_Core的购物APP功能。
+ * - 商品数据从指定的外部JSON文件加载，并与游戏数据库物品联动。
+ * - JSON文件路径硬编码为 data/phone/shopping.json。
+ * - JSON文件格式示例：[{"itemId": 1,"category": "食物"}]
+ *   - itemId: 数据库物品ID
+ *   - category: 物品分类
+ * - 点击购物项（类别）时，将打开一个独立的购物窗口，窗口内显示对应类别的商品网格。
+ * - 配置参数允许修改购物窗口的尺寸、网格数、网格尺寸等。
+ * - 插件参数中的“购物项列表”已被弃用，转而使用外部JSON加载。
+ * - 购物窗口居中显示，支持自定义宽高。
+ * - 网格布局支持自定义横纵数量、尺寸、间距和偏移。
+ * - 点击网格商品时，可自定义购买逻辑（当前仅显示，未实现购买，可扩展）。
+ * - 集成延迟发货：购买记录订单，延迟deliveryDays天，通过指令领取。
+ * - 每次购买提醒：买时弹窗“已发货，请注意查收”。
+ * - 快递变量：有到期订单时设deliveryVar=1，用于用户事件分支显示气泡。
+ * - 事件页第二页，出现条件设置为变量id的值为1，自定义-路线-脚本：$gameTemp.requestBalloon($gameMap.event(显示气泡的事件id),1); 等待60帧
+ * - 更简单的方法：共通事件，并行处理，分支，如果变量id多少的值为1，则事件id显示气泡（等待完成）
+ * - 检测优化：天变化时检查是否有到期订单。
+ */
+
+/*~struct~ShoppingSettings:
+ * @param 列表X轴偏移
+ * @desc 购物项列表的X轴偏移量（像素，正右负左）。为空使用APP默认。
+ * @type number
+ * @default 120
+ *
+ * @param 列表Y轴偏移
+ * @desc 购物项列表的Y轴偏移量（像素，正下负上）。为空使用APP默认。
+ * @type number
+ * @default 120
+ *
+ * @param 列表字体大小
+ * @desc 购物项列表的字体大小（像素）。为空使用APP默认。
+ * @type number
+ * @default 0
+ *
+ * @param 购物项间距
+ * @desc 购物项列表中名字之间的Y轴间距（像素）。
+ * @type number
+ * @default 10
+ *
+ * @param 购物项点击热区
+ * @desc 购物项列表项的点击热区宽度（像素）。
+ * @type number
+ * @default 80
+ */
+
+/*~struct~ShoppingDisplayRange:
+ * @param 范围宽度
+ * @desc APP显示范围的宽度（像素）。
+ * @type number
+ * @default 270
+ *
+ * @param 范围高度
+ * @desc APP显示范围的高度（像素）。
+ * @type number
+ * @default 350
+ *
+ * @param 范围X轴偏移
+ * @desc APP显示范围的X轴偏移量（像素，正右负左）。
+ * @type number
+ * @default 3
+ *
+ * @param 范围Y轴偏移
+ * @desc APP显示范围的Y轴偏移量（像素，正下负上）。
+ * @type number
+ * @default 100
+ */
+
+/*~struct~ShoppingWindowSettings:
+ * @param 窗口宽度
+ * @desc 购物窗口的宽度（像素）。
+ * @type number
+ * @default 1000
+ *
+ * @param 窗口高度
+ * @desc 购物窗口的高度（像素）。
+ * @type number
+ * @default 700
+ *
+ * @param X轴偏移
+ * @desc 购物窗口的X轴偏移量（像素，正右负左）。
+ * @type number
+ * @default 0
+ *
+ * @param Y轴偏移
+ * @desc 购物窗口的Y轴偏移量（像素，正下负上）。
+ * @type number
+ * @default 0
+ */
+
+/*~struct~ShoppingGridSettings:
+ * @param 横向网格数
+ * @desc 横向网格的数量。
+ * @type number
+ * @default 6
+ *
+ * @param 纵向网格数
+ * @desc 纵向网格的数量。
+ * @type number
+ * @default 4
+ *
+ * @param 网格宽度
+ * @desc 每个网格的宽度（像素）。
+ * @type number
+ * @default 110
+ *
+ * @param 网格高度
+ * @desc 每个网格的高度（像素）。
+ * @type number
+ * @default 110
+ *
+ * @param 网格X轴间距
+ * @desc 网格之间的X轴间距（像素）。
+ * @type number
+ * @default 60
+ *
+ * @param 网格Y轴间距
+ * @desc 网格之间的Y轴间距（像素）。
+ * @type number
+ * @default 50
+ *
+ * @param 网格X轴偏移
+ * @desc 网格整体的X轴偏移量（像素，正右负左）。
+ * @type number
+ * @default 10
+ *
+ * @param 网格Y轴偏移
+ * @desc 网格整体的Y轴偏移量（像素，正下负上）。
+ * @type number
+ * @default 10
+ */
+
+/*~struct~ShopItemSettings:
+ * @param 商品名称X偏移
+ * @desc 商品名称的X轴偏移量（像素，正右负左）。
+ * @type number
+ * @default 0
+ *
+ * @param 商品名称Y偏移
+ * @desc 商品名称的Y轴偏移量（像素，正下负上）。
+ * @type number
+ * @default 115
+ *
+ * @param 商品价格X偏移
+ * @desc 商品价格的X轴偏移量（像素，正右负左）。
+ * @type number
+ * @default 0
+ *
+ * @param 商品价格Y偏移
+ * @desc 商品价格的Y轴偏移量（像素，正下负上）。
+ * @type number
+ * @default 140
+ *
+ * @param 商品图标X偏移
+ * @desc 商品图标的X轴偏移量（像素，正右负左）。
+ * @type number
+ * @default 0
+ *
+ * @param 商品图标Y偏移
+ * @desc 商品图标的Y轴偏移量（像素，正下负上）。
+ * @type number
+ * @default 10
+ *
+ * @param 商品字体大小
+ * @desc 商品名称的字体大小（像素）。
+ * @type number
+ * @default 18
+ *
+ * @param 商品价格字体大小
+ * @desc 商品价格的字体大小（像素）。
+ * @type number
+ * @default 18
+ */
+
+/*~struct~ShopWindowBgSettings:
+ * @param 背景图片名称
+ * @desc 购物窗口的背景图片文件名，位于 img/phone/shopping 文件夹（可选）。
+ * @type file
+ * @dir img/phone/shopping/
+ * @default shopping_bg_window
+ *
+ * @param X轴偏移
+ * @desc 背景图片的X轴偏移量（像素，正右负左）。
+ * @type number
+ * @default 0
+ *
+ * @param Y轴偏移
+ * @desc 背景图片的Y轴偏移量（像素，正下负上）。
+ * @type number
+ * @default 0
+ */
+
+/*~struct~TimeVarsSettings:
+ * @param 年变量ID
+ * @desc 年变量ID。
+ * @type variable
+ * @default 23
+ *
+ * @param 月变量ID
+ * @desc 月变量ID。
+ * @type variable
+ * @default 24
+ *
+ * @param 日变量ID
+ * @desc 日变量ID。
+ * @type variable
+ * @default 25
+ *
+ * @param 星期变量ID
+ * @desc 星期变量ID。
+ * @type variable
+ * @default 27
+ */
+
+/*~struct~SalesLimit:
+ * @param 物品ID
+ * @desc 限制的物品ID。
+ * @type item
+ * @default 0
+ *
+ * @param 周期
+ * @desc 限制周期（年、月、日、周、无）。
+ * @type select
+ * @option 年
+ * @value year
+ * @option 月
+ * @value month
+ * @option 日
+ * @value day
+ * @option 周
+ * @value week
+ * @option 无
+ * @value none
+ * @default none
+ *
+ * @param 数量
+ * @desc 限制数量。
+ * @type number
+ * @default 1
+ */
+
+(function() {
+    // 获取插件参数
+    const UIPS_parameters = PluginManager.parameters('UI_Phone_shopping');
+    const UIPS_icon = UIPS_parameters['app图标'] || 'shopping/shopping_icon';
+    const UIPS_name = UIPS_parameters['app名称'] || '购物';
+    const UIPS_background = UIPS_parameters['app背景'] || 'shopping/shopping_bg';
+    const UIPS_switchId = parseInt(UIPS_parameters['开关ID'] || 44);
+    const UIPS_unit = UIPS_parameters['价格单位'] || 'G';
+    const UIPS_jsonFile = 'phone/shopping.json'; // 硬编码路径
+    const UIPS_deliveryDays = Number(UIPS_parameters['deliveryDays'] || 3);
+    const UIPS_deliveryVar = Number(UIPS_parameters['deliveryVar'] || 85);
+
+    // 解析时间变量
+    const UIPS_timeVarsParams = JSON.parse(UIPS_parameters['时间变量'] || '{}');
+    const UIPS_timeVars = {
+        year: parseInt(UIPS_timeVarsParams['年变量ID'] || 23),
+        month: parseInt(UIPS_timeVarsParams['月变量ID'] || 24),
+        day: parseInt(UIPS_timeVarsParams['日变量ID'] || 25),
+        week: parseInt(UIPS_timeVarsParams['星期变量ID'] || 27)
+    };
+
+    // 解析销售限制数组
+    let UIPS_salesLimitsRaw = UIPS_parameters['销售限制'] || '[]';
+    if (typeof UIPS_salesLimitsRaw === 'string') {
+        try {
+            UIPS_salesLimitsRaw = JSON.parse(UIPS_salesLimitsRaw);
+        } catch (e) {
+            console.error('Failed to parse 销售限制:', e);
+            UIPS_salesLimitsRaw = [];
+        }
+    }
+    const UIPS_salesLimits = Array.isArray(UIPS_salesLimitsRaw) ? UIPS_salesLimitsRaw.map(limit => {
+        if (typeof limit === 'string') {
+            try {
+                return JSON.parse(limit || '{}');
+            } catch (e) {
+                return {};
+            }
+        }
+        return limit;
+    }) : [];
+    const UIPS_processedSalesLimits = UIPS_salesLimits.map(limit => ({
+        itemId: parseInt(limit['物品ID'] || 0),
+        period: limit['周期'] || 'none',
+        quantity: parseInt(limit['数量'] || 1)
+    })).filter(limit => limit.itemId > 0 && limit.quantity > 0);
+
+    // 解析子结构参数
+    const UIPS_shoppingParams = JSON.parse(UIPS_parameters['购物项设置'] || '{}');
+    const UIPS_shoppingRangeParams = JSON.parse(UIPS_parameters['显示范围设置'] || '{}');
+    const UIPS_shoppingWindowParams = JSON.parse(UIPS_parameters['购物窗口'] || '{}');
+    const UIPS_shoppingGridParams = JSON.parse(UIPS_parameters['购物网格'] || '{}');
+    const UIPS_shopItemParams = JSON.parse(UIPS_parameters['商品信息'] || '{}');
+    const UIPS_shopWindowBgParams = JSON.parse(UIPS_parameters['商品窗口背景'] || '{}');
+
+    // 购物列表参数
+    const UIPS_listOffsetX = parseInt(UIPS_shoppingParams['列表X轴偏移'] || 120);
+    const UIPS_listOffsetY = parseInt(UIPS_shoppingParams['列表Y轴偏移'] || 120);
+    const UIPS_listFontSize = parseInt(UIPS_shoppingParams['列表字体大小'] || 0);
+    const UIPS_itemSpacing = parseInt(UIPS_shoppingParams['购物项间距'] || 10);
+    const UIPS_itemHitWidth = parseInt(UIPS_shoppingParams['购物项点击热区'] || 80);
+
+    // 购物窗口参数
+    const UIPS_shopWindowWidth = parseInt(UIPS_shoppingWindowParams['窗口宽度'] || 1000);
+    const UIPS_shopWindowHeight = parseInt(UIPS_shoppingWindowParams['窗口高度'] || 700);
+    const UIPS_shopWindowOffsetX = parseInt(UIPS_shoppingWindowParams['X轴偏移'] || 0);
+    const UIPS_shopWindowOffsetY = parseInt(UIPS_shoppingWindowParams['Y轴偏移'] || 0);
+
+    // 购物网格参数
+    const UIPS_gridCols = parseInt(UIPS_shoppingGridParams['横向网格数'] || 6);
+    const UIPS_gridRows = parseInt(UIPS_shoppingGridParams['纵向网格数'] || 4);
+    const UIPS_gridWidth = parseInt(UIPS_shoppingGridParams['网格宽度'] || 110);
+    const UIPS_gridHeight = parseInt(UIPS_shoppingGridParams['网格高度'] || 110);
+    const UIPS_gridXSpacing = parseInt(UIPS_shoppingGridParams['网格X轴间距'] || 60);
+    const UIPS_gridYSpacing = parseInt(UIPS_shoppingGridParams['网格Y轴间距'] || 50);
+    const UIPS_gridOffsetX = parseInt(UIPS_shoppingGridParams['网格X轴偏移'] || 10);
+    const UIPS_gridOffsetY = parseInt(UIPS_shoppingGridParams['网格Y轴偏移'] || 10);
+
+    // 商品信息参数
+    const UIPS_nameOffsetX = parseInt(UIPS_shopItemParams['商品名称X偏移'] || 0);
+    const UIPS_nameOffsetY = parseInt(UIPS_shopItemParams['商品名称Y偏移'] || 115);
+    const UIPS_priceOffsetX = parseInt(UIPS_shopItemParams['商品价格X偏移'] || 0);
+    const UIPS_priceOffsetY = parseInt(UIPS_shopItemParams['商品价格Y偏移'] || 140);
+    const UIPS_iconOffsetX = parseInt(UIPS_shopItemParams['商品图标X偏移'] || 0);
+    const UIPS_iconOffsetY = parseInt(UIPS_shopItemParams['商品图标Y偏移'] || 10);
+    const UIPS_nameFontSize = parseInt(UIPS_shopItemParams['商品字体大小'] || 18);
+    const UIPS_priceFontSize = parseInt(UIPS_shopItemParams['商品价格字体大小'] || 18);
+
+    // 商品窗口背景参数
+    const UIPS_bgImageName = UIPS_shopWindowBgParams['背景图片名称'] || 'shopping_bg_window';
+    const UIPS_bgOffsetX = parseInt(UIPS_shopWindowBgParams['X轴偏移'] || 0);
+    const UIPS_bgOffsetY = parseInt(UIPS_shopWindowBgParams['Y轴偏移'] || 0);
+
+    // 自动注册到核心插件
+    if (typeof GrokPhone !== 'undefined' && GrokPhone.registerApp) {
+        GrokPhone.registerApp({
+            type: 'shopping',
+            name: UIPS_name,
+            icon: UIPS_icon,
+            background: UIPS_background,
+            switchId: UIPS_switchId
+        });
+    }
+
+    // 加载外部JSON数据
+    let UIPS_shopData = [];
+    DataManager.loadDataFile('shopData', UIPS_jsonFile); // 加载JSON文件到window.shopData
+
+    const _UIPS_DataManager_onLoad = DataManager.onLoad;
+    DataManager.onLoad = function(object) {
+        _UIPS_DataManager_onLoad.call(this, object);
+        if (object === window['shopData']) {
+            UIPS_shopData = window['shopData'];
+        }
+    };
+
+    // 注册shopping处理器
+    if (typeof GrokPhone !== 'undefined' && GrokPhone.appHandlers) {
+        GrokPhone.appHandlers['shopping'] = {
+            initialize: function(scene) {
+                if (scene._appCustomData === undefined) scene._appCustomData = {};
+                scene._appCustomData.shopSubMode = 'list';
+                scene._appCustomData.currentShopCategoryIndex = -1;
+                // 处理JSON数据为类别分组
+                const categoryMap = {};
+                UIPS_shopData.forEach(item => {
+                    const cat = item.category;
+                    if (!categoryMap[cat]) {
+                        categoryMap[cat] = {category: cat, type: 'item', items: []};
+                    }
+                    categoryMap[cat].items.push(item.itemId);
+                });
+                scene._appCustomData.shopCategories = Object.values(categoryMap);
+            },
+            update: function(scene, relX, relY) {
+                const rangeWidth = parseInt(UIPS_shoppingRangeParams['范围宽度'] || 270);
+                const rangeHeight = parseInt(UIPS_shoppingRangeParams['范围高度'] || 350);
+                const rangeOffsetX = parseInt(UIPS_shoppingRangeParams['范围X轴偏移'] || 3);
+                const rangeOffsetY = parseInt(UIPS_shoppingRangeParams['范围Y轴偏移'] || 100);
+
+                if (scene._appCustomData && scene._appCustomData.shopSubMode === 'list') {
+                    // 购物类别列表模式：检查点击类别
+                    const categories = scene._appCustomData.shopCategories || [];
+                    const itemHeight = 48;
+                    const listX = UIPS_listOffsetX || 20;
+                    const listY = UIPS_listOffsetY || 40;
+                    let clickedCategory = -1;
+                    for (let j = 0; j < categories.length; j++) {
+                        const by = listY + j * (itemHeight + UIPS_itemSpacing) - (scene._scrollY || 0);
+                        if (by + itemHeight > rangeOffsetY && by < rangeOffsetY + rangeHeight) {
+                            if (relX >= listX && relX < listX + UIPS_itemHitWidth &&
+                                relY >= by && relY < by + itemHeight) {
+                                clickedCategory = j;
+                                break;
+                            }
+                        }
+                    }
+                    if (clickedCategory >= 0) {
+                        SoundManager.playOk();
+                        scene._appCustomData.currentShopCategoryIndex = clickedCategory;
+                        if (typeof scene.UIPS_createShoppingWindow === 'function') {
+                            scene.UIPS_createShoppingWindow(clickedCategory);
+                        }
+                        TouchInput.clear(); // 清空输入状态，防止双重触发
+                        return true;
+                    }
+                }
+
+                // 如果未处理，检查滚动
+                const inRange = relX >= rangeOffsetX && relX <= rangeOffsetX + rangeWidth &&
+                                relY >= rangeOffsetY && relY <= rangeOffsetY + rangeHeight;
+                if (inRange) {
+                    scene._isScrolling = true;
+                    scene._dragStartY = TouchInput.y;
+                    scene._scrollStartY = scene._scrollY;
+                    return true;
+                }
+                return false;
+            },
+            handleBack: function(scene) {
+                if (scene._appCustomData && scene._appCustomData.shopSubMode === 'list') {
+                    scene.returnToGrid();
+                    return true;
+                }
+                return false;
+            },
+            draw: function(window, scene) {
+                const rangeWidth = parseInt(UIPS_shoppingRangeParams['范围宽度'] || 270);
+                const rangeHeight = parseInt(UIPS_shoppingRangeParams['范围高度'] || 350);
+                const rangeOffsetX = parseInt(UIPS_shoppingRangeParams['范围X轴偏移'] || 3);
+                const rangeOffsetY = parseInt(UIPS_shoppingRangeParams['范围Y轴偏移'] || 100);
+
+                // 设置clip到显示范围
+                window.contents._context.save();
+                window.contents._context.beginPath();
+                window.contents._context.rect(rangeOffsetX, rangeOffsetY, rangeWidth, rangeHeight);
+                window.contents._context.clip();
+
+                window.changeTextColor(ColorManager.normalColor());
+
+                if (scene._appCustomData && scene._appCustomData.shopSubMode === 'list') {  // 显示购物类别列表
+                    const categories = scene._appCustomData.shopCategories || [];
+                    const listX = UIPS_listOffsetX || 20;
+                    const listY = UIPS_listOffsetY || 40;
+                    const listFont = UIPS_listFontSize || 24;
+                    window.contents.fontSize = listFont;
+                    const itemHeight = 48;
+                    // 计算总高度和最大滚动
+                    const totalHeight = categories.length * (itemHeight + UIPS_itemSpacing) - UIPS_itemSpacing;
+                    scene._maxScrollY = Math.max(0, totalHeight - rangeHeight);
+                    for (let j = 0; j < categories.length; j++) {
+                        const by = listY + j * (itemHeight + UIPS_itemSpacing) - (scene._scrollY || 0);
+                        if (by + itemHeight >= rangeOffsetY && by <= rangeOffsetY + rangeHeight) {
+                            window.drawText(categories[j].category || '未知', listX, by, rangeWidth - listX, itemHeight, 'left');
+                        }
+                    }
+                }
+
+                window.resetFontSettings();
+                window.contents._context.restore();
+            }
+        };
+    }
+
+    // 购物窗口类
+    function UIPS_Window_Shopping() {
+        this.initialize.apply(this, arguments);
+    }
+    UIPS_Window_Shopping.prototype = Object.create(Window_Base.prototype);
+    UIPS_Window_Shopping.prototype.constructor = UIPS_Window_Shopping;
+
+    UIPS_Window_Shopping.prototype.initialize = function(rect, categoryIndex) {
+        Window_Base.prototype.initialize.call(this, rect);
+        this._categoryIndex = categoryIndex;
+        this._iconBitmap = ImageManager.loadSystem('IconSet');
+        this._bgBitmap = UIPS_bgImageName ? ImageManager.loadPhonePicture(UIPS_bgImageName) : null;
+        this._iconBitmap.addLoadListener(this.refresh.bind(this));
+        if (this._bgBitmap) {
+            this._bgBitmap.addLoadListener(this.refresh.bind(this));
+        } else {
+            this.refresh();
+        }
+    };
+
+    UIPS_Window_Shopping.prototype.refresh = function() {
+        this.contents.clear();
+        if (!this._iconBitmap.isReady()) return;
+
+        // 绘制背景图片（如果存在且准备好且无错误）
+        if (this._bgBitmap && this._bgBitmap.isReady() && !this._bgBitmap.isError()) {
+            this.contents.blt(this._bgBitmap, 0, 0, this._bgBitmap.width, this._bgBitmap.height, UIPS_bgOffsetX, UIPS_bgOffsetY);
+        }
+
+        const scene = SceneManager._scene;
+        const categories = scene._appCustomData ? scene._appCustomData.shopCategories || [] : [];
+        const category = categories[this._categoryIndex];
+        if (!category) return;
+
+        const items = category.items || [];
+        const type = category.type || 'item';
+        let db;
+        switch (type) {
+            case 'item': db = $dataItems; break;
+            case 'weapon': db = $dataWeapons; break;
+            case 'armor': db = $dataArmors; break;
+            case 'keyItem': db = $dataItems; break;
+            default: db = $dataItems;
+        }
+
+        // 绘制网格
+        for (let i = 0; i < items.length; i++) {
+            if (i >= UIPS_gridCols * UIPS_gridRows) break;
+            const col = i % UIPS_gridCols;
+            const row = Math.floor(i / UIPS_gridCols);
+            const x = UIPS_gridOffsetX + col * (UIPS_gridWidth + UIPS_gridXSpacing);
+            const y = UIPS_gridOffsetY + row * (UIPS_gridHeight + UIPS_gridYSpacing);
+            const item = db[items[i]];
+            if (item) {
+                let soldOut = false;
+                const limit = UIPS_processedSalesLimits.find(l => l.itemId === items[i]);
+                if (limit) {
+                    if (!$gameSystem.salesCounts) $gameSystem.salesCounts = {};
+                    if (!$gameSystem.salesCounts[limit.itemId]) $gameSystem.salesCounts[limit.itemId] = { count: 0, lastPeriod: 0 };
+                    const record = $gameSystem.salesCounts[limit.itemId];
+                    let currentPeriod = 0;
+                    if (limit.period !== 'none') {
+                        const varId = UIPS_timeVars[limit.period];
+                        if (varId > 0) {
+                            currentPeriod = $gameVariables.value(varId);
+                            if (currentPeriod !== record.lastPeriod) {
+                                record.count = 0;
+                                record.lastPeriod = currentPeriod;
+                            }
+                        } else {
+                            console.error(`Invalid varId for period: ${limit.period}`);
+                        }
+                    }
+                    if (record.count >= limit.quantity) {
+                        soldOut = true;
+                    }
+                }
+
+                const iconIndex = item.iconIndex;
+                const iconSize = Math.min(UIPS_gridWidth, UIPS_gridHeight);
+                const dx = x + (UIPS_gridWidth - iconSize) / 2 + UIPS_iconOffsetX;
+                const dy = y + (UIPS_gridHeight - iconSize) / 2 + UIPS_iconOffsetY;
+                const sx = (iconIndex % 16) * 32;
+                const sy = Math.floor(iconIndex / 16) * 32;
+                this.contents.blt(this._iconBitmap, sx, sy, 32, 32, dx, dy, iconSize, iconSize);
+
+                this.contents.fontSize = UIPS_nameFontSize;
+                let processedName = item.name;
+                if (soldOut) {
+                    processedName = processedName.replace(/\\c\[\d+\]/g, '\\c[16]');
+                    this.changeTextColor('#666666');
+                }
+                const { width: nameWidth } = this.textSizeEx(processedName);
+                this.drawTextEx(processedName, x + UIPS_nameOffsetX + (UIPS_gridWidth - nameWidth) / 2, y + UIPS_nameOffsetY, UIPS_gridWidth);
+                this.resetFontSettings();
+
+                if (soldOut) {
+                    const soldOutText = '售罄';
+                    this.contents.fontSize = UIPS_priceFontSize;
+                    this.changeTextColor('#666666');
+                    const { width: soldOutWidth } = this.textSizeEx(soldOutText);
+                    this.drawTextEx(soldOutText, x + UIPS_priceOffsetX + (UIPS_gridWidth - soldOutWidth) / 2, y + UIPS_priceOffsetY, UIPS_gridWidth);
+                    this.resetFontSettings();
+                } else if (item.price > 0) {
+                    const priceText = item.price + UIPS_unit;
+                    this.contents.fontSize = UIPS_priceFontSize;
+                    const { width: priceWidth } = this.textSizeEx(priceText);
+                    this.drawTextEx(priceText, x + UIPS_priceOffsetX + (UIPS_gridWidth - priceWidth) / 2, y + UIPS_priceOffsetY, UIPS_gridWidth);
+                    this.resetFontSettings();
+                }
+            }
+        }
+    };
+
+    // 新增方法到Scene_Map
+    if (Scene_Map.prototype.UIPS_createShoppingWindow === undefined) {
+        Scene_Map.prototype.UIPS_createShoppingWindow = function(categoryIndex) {
+            if (this._UIPS_shoppingWindow) {
+                this.UIPS_closeShoppingWindow();
+            }
+            const rect = new Rectangle(0, 0, UIPS_shopWindowWidth, UIPS_shopWindowHeight);
+            this._UIPS_shoppingWindow = new UIPS_Window_Shopping(rect, categoryIndex);
+            this._UIPS_shoppingWindow.x = (Graphics.width - UIPS_shopWindowWidth) / 2 + UIPS_shopWindowOffsetX;
+            this._UIPS_shoppingWindow.y = (Graphics.height - UIPS_shopWindowHeight) / 2 + UIPS_shopWindowOffsetY;
+            this.addChild(this._UIPS_shoppingWindow);
+            this._UIPS_shoppingWindow.visible = true;
+        };
+    }
+
+    if (Scene_Map.prototype.UIPS_updateShoppingWindow === undefined) {
+        Scene_Map.prototype.UIPS_updateShoppingWindow = function() {
+            const mx = TouchInput.x;
+            const my = TouchInput.y;
+            const relX = mx - this._UIPS_shoppingWindow.x;
+            const relY = my - this._UIPS_shoppingWindow.y;
+
+            if (TouchInput.isCancelled()) {
+                this.UIPS_closeShoppingWindow();
+                return;
+            }
+
+            if (TouchInput.isTriggered()) {
+                const scene = SceneManager._scene;
+                const categories = scene._appCustomData ? scene._appCustomData.shopCategories || [] : [];
+                const category = categories[this._UIPS_shoppingWindow._categoryIndex];
+                if (!category) return;
+                const items = category.items || [];
+                for (let i = 0; i < items.length; i++) {
+                    if (i >= UIPS_gridCols * UIPS_gridRows) break;
+                    const col = i % UIPS_gridCols;
+                    const row = Math.floor(i / UIPS_gridCols);
+                    const x = UIPS_gridOffsetX + col * (UIPS_gridWidth + UIPS_gridXSpacing);
+                    const y = UIPS_gridOffsetY + row * (UIPS_gridHeight + UIPS_gridYSpacing);
+                    if (relX >= x && relX < x + UIPS_gridWidth && relY >= y && relY < y + UIPS_gridHeight) {
+                        const type = category.type || 'item';
+                        let db;
+                        switch (type) {
+                            case 'item': db = $dataItems; break;
+                            case 'weapon': db = $dataWeapons; break;
+                            case 'armor': db = $dataArmors; break;
+                            default: db = $dataItems;
+                        }
+                        const item = db[items[i]];
+                        if (item) {
+                            const price = item.price;
+                            const limit = UIPS_processedSalesLimits.find(l => l.itemId === items[i]);
+                            let canBuy = true;
+                            if (limit) {
+                                const itemId = limit.itemId;
+                                if (!$gameSystem.salesCounts) $gameSystem.salesCounts = {};
+                                if (!$gameSystem.salesCounts[itemId]) $gameSystem.salesCounts[itemId] = { count: 0, lastPeriod: 0 };
+                                const record = $gameSystem.salesCounts[itemId];
+                                let currentPeriod = 0;
+                                if (limit.period !== 'none') {
+                                    const varId = UIPS_timeVars[limit.period];
+                                    if (varId > 0) {
+                                        currentPeriod = $gameVariables.value(varId);
+                                        if (currentPeriod !== record.lastPeriod) {
+                                            record.count = 0;
+                                            record.lastPeriod = currentPeriod;
+                                        }
+                                    } else {
+                                        console.error(`Invalid varId for period: ${limit.period}`);
+                                    }
+                                }
+                                if (record.count >= limit.quantity) {
+                                    canBuy = false;
+                                }
+                            }
+                            if (!canBuy) {
+                                SoundManager.playBuzzer();
+                                $gameMessage.add('暂时无法购买，请等待补货！');
+                            } else if (price > 0 && $gameParty.gold() < price) {
+                                SoundManager.playBuzzer();
+                                $gameMessage.add('金钱不足！');
+                            } else {
+                                SoundManager.playShop();
+                                $gameParty.loseGold(price);
+                                // 记录订单而不是立即获得物品
+                                if (!$gameSystem.UIPS_orders) $gameSystem.UIPS_orders = [];
+                                $gameSystem.UIPS_orders.push({
+                                    itemId: items[i],
+                                    type: type,
+                                    quantity: 1,
+                                    purchaseDate: {
+                                        year: $gameVariables.value(UIPS_timeVars.year) || 1,
+                                        month: $gameVariables.value(UIPS_timeVars.month) || 1,
+                                        day: $gameVariables.value(UIPS_timeVars.day) || 1
+                                    }
+                                });
+                                if (limit) {
+                                    const record = $gameSystem.salesCounts[limit.itemId];
+                                    record.count++;
+                                }
+                                // 每次购买提醒
+                                $gameMessage.add('已发货，请注意查收。');
+                                // 刷新窗口
+                                this._UIPS_shoppingWindow.refresh();
+                                // 检查是否有到期订单并更新变量
+                                UIPS_checkHasArrived();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        };
+    }
+
+    if (Scene_Map.prototype.UIPS_closeShoppingWindow === undefined) {
+        Scene_Map.prototype.UIPS_closeShoppingWindow = function() {
+            if (this._UIPS_shoppingWindow) {
+                this.removeChild(this._UIPS_shoppingWindow);
+                this._UIPS_shoppingWindow = null;
+            }
+        };
+    }
+
+    // 扩展Scene_Map.update
+    const _UIPS_Scene_Map_update = Scene_Map.prototype.update;
+    Scene_Map.prototype.update = function() {
+        _UIPS_Scene_Map_update.call(this);
+        if (this._UIPS_shoppingWindow && this._UIPS_shoppingWindow.visible) {
+            this.UIPS_updateShoppingWindow();
+        }
+    };
+
+    // 扩展Scene_Map.updatePhoneWindow
+    const _UIPS_Scene_Map_updatePhoneWindow = Scene_Map.prototype.updatePhoneWindow;
+    Scene_Map.prototype.updatePhoneWindow = function() {
+        if (this._UIPS_shoppingWindow && this._UIPS_shoppingWindow.visible) {
+            return;
+        }
+        _UIPS_Scene_Map_updatePhoneWindow.call(this);
+    };
+
+    // 扩展Scene_Map.isTouchOnPhoneUI
+    const _UIPS_Scene_Map_isTouchOnPhoneUI = Scene_Map.prototype.isTouchOnPhoneUI;
+    Scene_Map.prototype.isTouchOnPhoneUI = function() {
+        if (this._UIPS_shoppingWindow && this._UIPS_shoppingWindow.visible) {
+            return true;
+        }
+        return _UIPS_Scene_Map_isTouchOnPhoneUI.call(this);
+    };
+
+    // 订单到期检查函数
+    const UIPS_isOrderDue = function(order) {
+        const currentYear = $gameVariables.value(UIPS_timeVars.year) || 1;
+        const currentMonth = $gameVariables.value(UIPS_timeVars.month) || 1;
+        const currentDay = $gameVariables.value(UIPS_timeVars.day) || 1;
+        const purchaseYear = order.purchaseDate.year || 1;
+        const purchaseMonth = order.purchaseDate.month || 1;
+        const purchaseDay = order.purchaseDate.day || 1;
+        const daysPassed = (currentYear - purchaseYear) * 360 + (currentMonth - purchaseMonth) * 30 + (currentDay - purchaseDay);
+        return daysPassed >= UIPS_deliveryDays;
+    };
+
+    // 检查是否有到期订单并更新变量
+    const UIPS_checkHasArrived = function() {
+        if (!$gameSystem.UIPS_orders || !Array.isArray($gameSystem.UIPS_orders)) {
+            $gameSystem.UIPS_orders = [];
+            if (UIPS_deliveryVar > 0) $gameVariables.setValue(UIPS_deliveryVar, 0);
+            return;
+        }
+        const hasArrived = $gameSystem.UIPS_orders.some(UIPS_isOrderDue);
+        if (UIPS_deliveryVar > 0) $gameVariables.setValue(UIPS_deliveryVar, hasArrived ? 1 : 0);
+    };
+
+    // 扩展Game_Variables.setValue以监听时间变化
+    const _UIPS_Game_Variables_setValue = Game_Variables.prototype.setValue;
+    Game_Variables.prototype.setValue = function(variableId, value) {
+        _UIPS_Game_Variables_setValue.call(this, variableId, value);
+        if (variableId === UIPS_timeVars.day || variableId === UIPS_timeVars.month || variableId === UIPS_timeVars.year) {
+            UIPS_checkHasArrived();
+        }
+    };
+
+    // 注册插件指令
+    PluginManager.registerCommand('UI_Phone_shopping', 'deliveryStation', function() {
+        UIPS_checkHasArrived();
+        if (!$gameSystem.UIPS_orders.some(UIPS_isOrderDue)) {
+            $gameMessage.add('暂无快递！');
+            return;
+        }
+        const dueOrders = $gameSystem.UIPS_orders.filter(UIPS_isOrderDue);
+        if (dueOrders.length === 0) {
+            $gameMessage.add('暂无快递！');
+            return;
+        }
+        // 批量领取
+        const itemMap = {};
+        dueOrders.forEach(order => {
+            const key = order.type + '_' + order.itemId;
+            if (!itemMap[key]) itemMap[key] = {type: order.type, itemId: order.itemId, quantity: 0};
+            itemMap[key].quantity += order.quantity;
+        });
+        Object.values(itemMap).forEach(group => {
+            let db;
+            switch (group.type) {
+                case 'item': db = $dataItems; break;
+                case 'weapon': db = $dataWeapons; break;
+                case 'armor': db = $dataArmors; break;
+                default: db = $dataItems;
+            }
+            const item = db[group.itemId];
+            if (item) {
+                $gameParty.gainItem(item, group.quantity);
+            }
+        });
+        // 移除已领订单
+        $gameSystem.UIPS_orders = $gameSystem.UIPS_orders.filter(order => !UIPS_isOrderDue(order));
+        $gameMessage.add('领取成功！');
+        UIPS_checkHasArrived(); // 更新变量为0
+    });
+
+    // 初始化订单和变量
+    const _UIPS_DataManager_createGameObjects = DataManager.createGameObjects;
+    DataManager.createGameObjects = function() {
+        _UIPS_DataManager_createGameObjects.call(this);
+        if (!$gameSystem.UIPS_orders) $gameSystem.UIPS_orders = [];
+        UIPS_checkHasArrived();
+    };
+
+})();
